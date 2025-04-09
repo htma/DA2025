@@ -1,0 +1,1275 @@
+\documentclass[fontset=fandol,UTF8,fleqn]{beamer}
+% \usepackage[english]{babel}
+%\PassOptionsToPackage{quiet}{fontspec}
+\usepackage[UTF8]{ctex}
+%\usepackage{fontspec}
+
+%\usepackage[useregional]{datetime2}
+%\usepackage{mathtools,amsthm,amssymb,bm,amsmath,mathrsfs}
+\usepackage{amssymb,amsfonts,amsmath,amsthm,mathrsfs,mathptmx} %数学常用宏包
+\usepackage{amsfonts}
+ \usepackage{graphicx}
+% \usepackage[backend=biber,style=authoryear]{biblatex}
+% \addbibresource{biblio.bib}
+
+\newcommand{\projdim}[1]{\mathbb{P}^#1}
+\newcommand{\esperanza}[1]{\mathbb{E}(#1)}
+\newcommand{\proba}[1]{\mathbb{P}(#1)}
+\newcommand{\gavilla}[2]{\mathcal{O}_{#1}(#2)}
+
+ \newcommand{\citap}[1]{\textcolor{blue}{(\cite{#1})}}
+
+% diagramas
+\usepackage{tikz, tikz-cd}
+\usepackage{pgf}
+\usetikzlibrary{cd, babel}  % evita errores en tikz
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{arrows,automata}
+
+
+% vertical separator macro
+\newcommand{\vsep}{
+  \column{0.0\textwidth}
+    \begin{tikzpicture}
+      \draw[very thick,black!10] (0,0) -- (0,7.3);
+    \end{tikzpicture}
+}
+
+% More space between lines in align
+\setlength{\mathindent}{0pt}
+
+% % Beamer theme
+ \usetheme{ZMBZFMK}
+\usefonttheme[onlysmall]{structurebold}
+\mode<presentation>
+\setbeamercovered{transparent=10}
+
+% align spacing
+\setlength{\jot}{0pt}
+
+ \setCJKmainfont[ItalicFont={AR PL UKai CN}]{AR PL UMing CN}
+\setCJKmainfont[ItalicFont={AR PL UKai CN}]{SimSun}
+ \setCJKsansfont{SimSun}
+\setCJKmonofont{FangSong}
+
+% \AtBeginSection[]
+% {
+%   \begin{frame}
+%     \frametitle{Table of Contents}
+%     \tableofcontents[currentsection]
+%   \end{frame}
+% }
+% \AtBeginSubsection[]
+% {
+%   \begin{frame}
+%     \frametitle{Table of Contents}
+%     \tableofcontents[currentsubsection]
+%   \end{frame}
+% }
+
+
+% Only the first Slide
+\title{{算法设计与分析}}
+\author{MHT}
+\institute[Northeastern University at Qinhuangdao]{ }
+\date{\today}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Divide and Conquer}
+
+\begin{frame}{第2章 递归与分治策略}
+\begin{itemize}[<+-|alert@+>]
+\item 理解递归的概念
+\item 掌握分治算法设计策略
+\item 二分查找技术; 大整数乘法; 矩阵乘法; 合并排序;  快速排序 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{分治策略概述}
+  \begin{exampleblock}{分治策略}
+    将一个难以直接解决的大问题, 分割成一些规模较小的相同子问题, 各个击
+    破, ``\textbf{分而治之}'' 
+  \end{exampleblock}
+
+ \begin{itemize}[<+-|alert@+>]
+  \item 将要求解的问题划分成~$k$~个小问题
+  \item 然后对这~$k$~个子问题\underline{递归求解}
+  \item 合并子问题的解
+\end{itemize}
+\end{frame}
+
+\begin{frame}{分治策略应用的典型情况}
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{./pictures/divide-and-conquer.png}%
+%  \caption{分治技术的典型情况}
+  \label{fig:dcm}
+\end{figure}
+\end{frame}
+
+\begin{frame}{2.1 递归的概念}
+\begin{definition}[递归函数]
+  用函数自身给出定义的函数称为递归函数.  
+\end{definition}
+\begin{definition}[递归算法]
+直接或间接地调用自身的算法称为递归算法.  
+\end{definition}
+\end{frame}
+
+\begin{frame}{递归定义条件}
+对于函数 $f(n)$ 的递归定义, 必须满足如下条件: 
+\begin{itemize}[<+-|alert@+>]
+\item \textbf{基本部分:}  其中对于 $n$ 的一个或多个值, $f(n)$ 必须是直接定义的(即非递归)  
+\item \textbf{递归部分:} 右侧所出现的所有 $f$ 的参数都必须有一个比 $n$ 小, 以重复运用递归部分来改变右侧出现的 $f$ , 直至出现 $f$ 的基本部分 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{例2-1 阶乘函数}
+  阶乘函数$f(n)$可递归地定义为
+  \begin{exampleblock}{}
+\begin{displaymath}
+\boldsymbol{  f(n)}=\left\{\begin{array}{ll}
+1 & ,n=0 \hspace{5cm}  (1) \\
+n\times f(n-1) & ,n >0 \hspace{5cm} (2) 
+\end{array}\right. 
+\end{displaymath}
+\end{exampleblock}
+\begin{itemize}[<+-|alert@+>]
+\item 阶乘函数的自变量~$n$~的定义域是非负整数 
+\item 定义式的第(1)式给出了函数的初始值, 是非递归定义 
+\item 定义式的第(2)式左右两边都引用了阶乘函数记号, 是一个递归定义式 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{算法描述}
+  \begin{exampleblock}{Algorithm. $F(n)$.}
+\qquad \textbf{if} $n = 0$: \\
+\qquad\qquad \textbf{return} 1 \\
+\qquad \textbf{else:} \\
+\qquad\qquad \textbf{return} $F(n-1)*n$
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{阶乘函数算法计算复杂性分析}
+\begin{itemize}[<+-|alert@+>]
+\item 算法输入规模为 $n$  
+\item 算法基本操作是乘法  
+\item 算法基本操作执行次数记作 $M(n)$ 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{计算 $M(n)$}
+\begin{itemize}[<+-|alert@+>]
+\item 当 $n>0$ 时, $F(n)=F(n-1)* n$  
+\item 计算 $F(n)$ 时, 用到的乘法数量 $M(n)$ 需要满足公式  
+  \begin{displaymath}
+    M(n) = M(n-1) + 1, \qquad n > 0  
+  \end{displaymath}
+\item $M(n)=M(n-1)+1$ 定义了需要求值的 $M(n)$ 的序列, 该式为一递归式 
+\item 为了解递归式, 需要一个初始条件说明序列的初始值  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{分析递归式 $M(n)=M(n-1)+1$}
+  \begin{exampleblock}{Algorithm. $Fac(n)$.}
+    \qquad \textbf{if} $n = 0$: \\
+    \quad\qquad \textbf{return} 1 \\
+\qquad \textbf{else:} \\
+\qquad\qquad \textbf{return} $F(n-1)*n$
+\end{exampleblock}
+\begin{itemize}[<+-|alert@+>]
+\item 调用在 $n=0$ 时结束,算法处理的 $n$ 的最小值是 $0$  
+\item 当 $n=0$ 时, 该算法不执行乘法操作 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{算法复杂性递归关系和初始条件}
+  \begin{exampleblock}{M(n).}
+    \begin{displaymath}
+  \left\{ \begin{array}{lll}
+  M(n) & = & M(n-1)+1, \qquad n > 0 \\
+M(0) & = & 0, \qquad\ \qquad \quad \qquad n = 0
+\end{array}\right.
+\end{displaymath}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time}
+  \begin{exampleblock}{M(n)=n.}
+    \begin{eqnarray*}
+  M(n) & = & M(n-1)+ 1     \\
+& = & [M(n-2)+1]+1  =  M(n-2)+2    \\
+& = & [M(n-3)+1]+2 = M(n-3)+3   \\
+\ldots   \\
+\Rightarrow M(n) & = & \underline{M(n-i)+i}  \\
+\Rightarrow M(n) & = & M(n-n)+n=n.  
+    \end{eqnarray*}
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{递归算法复杂性分析方案}
+\begin{itemize}[<+-|alert@+>]
+\item[(1)] 决定用哪个参数表示输入规模度量  
+\item[(2)] 找出算法的基本操作  
+\item[(3)] 检查基本操作的执行次数是否只依赖于输入规模  
+\item[(4)] 建立算法基本操作执行次数的递归式及相应的初始条件   
+\item[(5)] 解递归式, 或者确定它的渐近函数  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{例2-2 Fibonacci~数列}
+  无穷数列 1, 1, 2, 3, 5, 8, 13, \ldots,  称为~Fibonacci~数列:
+  \begin{exampleblock}{}
+     \begin{displaymath}
+   F(n)=\left\{\begin{array}{ll}
+1 & ,n=0\\
+1 & ,n=1\\
+F(n-1)+F(n-2) & ,n>1
+\end{array}\right. 
+\end{displaymath}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fibonacci 数列计算算法}
+  \begin{exampleblock}{Algorithm.$Fib(n)$}
+\qquad    \textbf{if} $n \leq 1$:\\
+\qquad \qquad \textbf{return} 1\\
+\qquad    \textbf{return} $Fib(n-2) + Fib(n-1)$
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{阶乘与 Fibonacci 的非递归定义}
+  上述两例中的函数也可用如下非递归方式定义:
+  \begin{exampleblock}{阶乘}
+    \begin{displaymath}
+  n!=1\times 2\times 3\times \cdots \times (n-1)\times n
+\end{displaymath}
+\end{exampleblock}
+\begin{exampleblock}{ Fibonacci}
+  \begin{displaymath}
+  F(n)=\frac{1}{\sqrt{5}}\Bigg[\bigg(\frac{1+\sqrt{5}}{2}\bigg)^{n+1}-\bigg(\frac{1-\sqrt{5}}{2}\bigg)^{n+1}\Bigg]
+\end{displaymath}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{例2-3 Ackerman~函数}
+%当一个函数及它的一个变量是由函数自身定义时, 称这个函数是双递归函数. 
+Ackerman~函数 $A(n, m)$ 包含两个独立整形变量$m \geq 0$, $n\geq 0$, 定
+义如下：
+\begin{exampleblock}{Ackerman Function}  
+\begin{eqnarray*}
+  \left\{\begin{array}{lll}
+A(1, 0) & =2 & \\
+A(0, m)& =1 &  m \geq 0\\
+A(n, 0) & = n + 2 & n \geq 2\\
+A(n, m)& =A(A(n-1, m), m-1) & n, m \geq 1
+\end{array}\right. 
+\end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{}
+  \begin{exampleblock}{}
+    $A(n,  m)$~的自变量~$m$~的每一个值都定义了一个单变量函数,  例如:  
+
+$m=0$~时,    $A(n, 0)=n+2$; 
+
+ $m=1$~时,　  \\
+$A(1, 1)=A(\underline{A(0,1)},0)=A(\underline{1},0)=2$, 则  
+ \begin{eqnarray*}
+      A(n, 1) & = & A(\underline{A(n-1, 1)}, 0)  \\
+& = & \underline{A(n-1, 1)}+2  \\  
+& = & 2*n  
+ \end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time}
+  请根据
+    \begin{displaymath}
+  A(n, 1)  =  A(n-1, 1)+2
+\end{displaymath}
+推导出$A(n,1)=2*n$ [提示：反向替换法].
+\end{frame}
+
+\begin{frame}{$A(n, 1)=2*n$ 的推导}
+  \begin{exampleblock}{$A(n, 1)=2*n$ 的推导}
+\begin{eqnarray*}
+  A(n, 1) & = & \underline{A(n-1, 1)}+2   \\
+ &  = & \underline{[A(n-2, 1)+2]}+2   \\  
+&  = & [A(n-3, 1)+2]+2* 2   \\
+%\vdots & = & \vdots  \\
+& = & A(n-i, 1)+2* i  \\
+%\vdots & = & \vdots  \\
+A(n, 1) & = & A(n-(n-1), 1)+(n-1)* 2   \\
+& = & A(1,1)+(n-1)* 2   \\
+& = & 2*n  
+\end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Ackerman~函数}
+  \begin{exampleblock}{}
+$m=2$~时,  $A(n, 2)=A(A(n-1, 2), 1)=2A(n-1, 2)$,  和~$A(1, 2)=A(A(0, 2), 1)=A(1, 1)=2$,  $A(n, 2)= 2^n$; 
+
+$m=3$~时,  类似的可以推出~$A(n, 3)=2^{2^{\cdot^{\cdot^{\cdot^2}}}} $; 
+
+$m=4$~时,  $A(n, 4)$~的增长速度非常快, 没有适当的数学式子来表示这一函数.  
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{补充 \underline{Ackerman} 函数}
+  \begin{exampleblock}{Acerman Function}
+    \begin{displaymath}
+A(m, n)=\left \{ \begin{array}{ll}
+n + 1 & if\ m = 0 \\
+A(m-1, 1) & if\ m > 0\ and\ n = 0 \\
+A(m-1, A(m, n-1)) & if\ m > 0\ and\ n > 0
+\end{array}\right.
+\end{displaymath}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Ackermann函数算法}
+  \begin{exampleblock}{Algorithm.$Ack(m, n)$}
+\qquad \textbf{if} $m == 0$:\\
+\qquad \qquad     \textbf{return} $n + 1$\\
+\qquad \textbf{if} $m > 0\ and\ n == 0$:\\
+\qquad \qquad     \textbf{return} $Ack(m-1, 1)$\\
+\qquad \textbf{if} $m > 0\ and\ n > 0$:\\
+\qquad \qquad     \textbf{return} $Ack(m-1, Ack(m, n-1))$
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{例2-4 排列问题}
+  \begin{exampleblock}{排列问题}
+    对~$R=\{r_1, r_2, \ldots,r_n\}$, ~$n$~元素排列. 
+  \end{exampleblock}
+  \begin{itemize}[<+-|alert@+>]
+\item $R_i=R-\{r_i\}$  
+\item 集合~$X$的全排列记为~$\mathrm{Perm}(X)$　 
+\item $(r_i)\mathrm{Perm}(X)$~表示在全排列~$\mathrm{Perm}(X)$ 
+的每一个排列前加上前缀得到的排列   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{$R$全排列递归定义}
+\begin{itemize}[<+-|alert@+>]
+\item 当~$n=1$~时,  $\mathrm{Perm}(R)=(r)$,  其中~$r$~是集合~$R$~中唯一的元素; 
+\item 当~$n>1$~时, $\mathrm{Perm}(R)$~由~ $(r_1)\mathrm{Perm}(R_1)$
+ , $\ldots$, $(r_n)\mathrm{Perm}(R_n)$~构成. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{排列基本计算思想}
+  $R=\{1, 2, 3, 4\}$, 则 $R_1=R-r_1=\{2, 3, 4\}$,
+  \begin{exampleblock}{Idea of Permutation.}
+    \begin{eqnarray*}
+  (r_1)\mathrm{Perm}(R_1) & = & \mathbf{1} \mathrm{Perm}(R_1)   \\
+& = & \mathbf{1}\quad  2\quad 3 \quad 4\\ 
+& & \mathbf{1}\quad  2\quad 4 \quad 3   \\ 
+& & \mathbf{1}\quad  3\quad 2 \quad 4  \\ 
+& & \mathbf{1}\quad  3\quad 4 \quad 2   \\
+& & \mathbf{1}\quad  4\quad  {3 \quad 2}  \\
+& & \mathbf{1}\quad  4\quad {2 \quad 3}  
+\end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{排列问题求解算法}
+  \begin{exampleblock}{Algorithm.$Perm(A, k, m)$}
+\qquad    \textbf{if} $(k == m) $\\
+ \qquad \qquad  \textbf{for} $x\ in\ A$:  \qquad \textbf{print} $x$\\
+\qquad \textbf{else}\\
+\qquad \qquad $i = k$\\
+\qquad \qquad \textbf{while} $i \leq m$\\
+\qquad \qquad \qquad $A[k], A[i] = A[i], A[k]$\\
+\qquad \qquad \qquad $Perm(A, k+1, m)$\\
+\qquad \qquad \qquad $ A[k], A[i] = A[i], A[k]$\\
+\qquad \qquad \qquad $i = i + 1$
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{例2-5 整数划分问题}
+\begin{itemize}[<+-|alert@+>]
+\item 将正整数~$n$~表示成一系列正整数之和: 
+\begin{displaymath}
+  n=n_1+n_2+\ldots +n_k, (n_1\geq n_2 \geq \ldots \geq n_k \geq 1,  k\geq 1) 
+\end{displaymath}
+\item 正整数~$n$~的这种表示称为\textbf{正整数~$n$~的划分} 
+\item 正整数 $n$ 的不同的划分个数称为 $n$ 的划分数, 记作~$p(n)$   
+\item \textbf{整数划分问题}: 求正整数~$n$~的不同划分个数   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fun Time}
+  正整数 $5$ 的不同划分个数.
+  \begin{exampleblock}{}
+    \begin{displaymath}
+  n=n_1+n_2+\ldots +n_k, (n_1\geq n_2 \geq \ldots \geq n_k \geq 1,  k\geq 1) 
+\end{displaymath}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{正整数5的划分}
+  正整数 $5$ 有如下 $7$ 种不同的划分:  
+  \begin{exampleblock}{}
+    \begin{eqnarray*}
+&   & 5;   \\
+ &   & 4+1;   \\
+& &   3+2,  3+1+1;   \\
+ & & 2+2+1,  2+1+1+1;  \\
+  & & 1+1+1+1+1.   
+ \end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{整数划分算法思想}
+\begin{itemize}[<+-|alert@+>]
+\item 将最大加数~$n_1$~不大于~$m$~的划分个数记作~$q(n, m)$ 
+\item 建立~$q(n, m)$~如下递归关系   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{$q(n,m)$递归公式}
+\begin{itemize}[<+-|alert@+>]
+  \item[(1)] $n\geq 1$: $\boldsymbol{q(n,1)=1}$,  
+%当最大加数 $n_1$ 不大于 1 时，任何正整数 $n$ 只有一种划分形式，即 
+$n=\overbrace{1+1+\cdots +1}$. 
+  \item[(2)] $m>n$: $\boldsymbol{q(n,m)=q(n,n)}$,
+%; 最大加数 $n_1$ 实际上不能大于 $n$.  因此,
+ $q(1,m)=1$. 
+\item[(3)] $m=n$: $\boldsymbol{q(n,m)=1+q(n,n-1)}$, 正整数 $n$ 的划分由 $n_1=n$
+  的划分和 $n_1\leq n-1$ 的划分组成. 
+  \item[(4)] $n>m>1$: $q(n,m)=q(n,m-1)+q(n-m,m)$; 正整数 $n$ 的最大加数 $n_1
+$ 不大于 $m$ 的划分由 $n_1=m$ 的划分和 $n_1\leq m-1$ 的划分组成. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{}
+  以上的关系给出了计算~$q(n, m)$~的递归式如下:  
+  \begin{exampleblock}{}
+    \begin{displaymath}
+\boldsymbol{ q(n, m)=}\left\{\begin{array}{lll}
+1 & $n=1 or\   m=1$   \\
+q(n, n) & n<m   \\
+1+q(n, n-1) & n=m   \\
+q(n, m-1)+q(n-m, m) & n>m>1  
+\end{array} \right. 
+\end{displaymath}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Hanoi塔问题}
+  \begin{exampleblock}{Hanoi塔问题}
+     我们有 $n$ 个不同大小的盘子和3根柱子, 开始时所有盘子都按照大小顺序套在第一根柱子上, 最大的盘子在底部, 最小的盘子在顶部.  
+
+目的是把所有的盘子都移到第3根柱子上, 必要的时候可以借助第二根柱子. 每次只能移动
+一个盘子, 但是不能把较大的盘子放在较小的盘子上面.  
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Hanoi 问题递归算法思想}
+\end{frame}
+
+\begin{frame}{算法复杂性分析}
+\begin{itemize}[<+-|alert@+>]
+\item 选择盘子的数量 $n$ 作为输入规模度量 
+\item 选择盘子的移动作为算法的基本操作  
+\item 移动次数为 $M(n)$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{建立递归关系式}
+  \begin{exampleblock}{}
+    \begin{displaymath}
+  \left \{ \begin{array}{lll}
+  M(n) & = & 2M(n-1)+1, \qquad n > 1 \\
+M(1) & = & 1, \qquad \qquad \qquad \qquad  n =1
+\end{array} \right.
+\end{displaymath}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time}
+  \begin{exampleblock}{ Hanoi 塔递归关系式求解}
+    \begin{displaymath}
+  \left \{ \begin{array}{lll}
+  M(n) & = & 2M(n-1)+1, \qquad n > 1 \\
+M(1) & = & 1, \qquad \qquad \qquad \qquad  n =1
+\end{array} \right.
+\end{displaymath}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time}
+  \begin{exampleblock}{}
+    \begin{eqnarray*}
+  M(n) & = & 2M(n-1)+1   \\
+& = & 2[2M(n-2)+1]+1 = 2^2M(n-2)+2+1  \\
+& = & 2^2[2M(n-3)+1]+2+1   \\
+& = & 2^3M(n-3)+2^2+2+1  \\
+\ldots   \\
+\Rightarrow M(n) & = & 2^i(M(n-i)+2^i-1   \\
+\Rightarrow M(n) & = & 2^{n-1}M(n-(n-1))+2^{n-1}-1   \\
+& = & 2^n -1   
+    \end{eqnarray*}
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Hanoi问题求解算法}
+  \begin{exampleblock}{Algorithm. $Hanoi(n, source, helper, target)$}
+\textbf{if} $ n > 0$\\
+%\qquad \# move tower of size $n-1$ to helper:\\
+\qquad $Hanoi(n - 1, source, target, helper)$\\
+%\qquad\# move disk from source peg to target peg\\
+\qquad \textbf{if} source\\
+\qquad \qquad target.append(source.pop())\\
+%\qquad \# move tower of size $n-1$ from helper to target\\
+\qquad $ hanoi(n - 1, helper, source, target)$
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Tips}
+\begin{center}
+\huge{\textbf{应谨慎使用递归算法, 它们的简洁可能会掩盖它们的低效性.}}
+\end{center}
+\end{frame}
+
+\begin{frame}{递归小结}
+\begin{itemize}[<+-|alert@+>]
+\item 结构清晰, 可读性强, 而且容易用数学归纳法来证明算法的正确性, 为设计算法、调试程序带来很大方便   
+\item 递归算法的运行效率较低,  无论是耗费的计算时间还是占用的存储空间都比非递归算法要多   
+\item 在递归算法中消除递归调用,  使其转化为非递归算法   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{2.2 分治法的基本思想}
+分治法解决问题一般特征: 
+\begin{itemize}[<+-|alert@+>]
+\item[(1)]问题的规模缩小到一定程度就可以容易地解决 
+\item[(2)] 问题可分解为若干规模较小的相同问题 
+\item[(3)] 利用子问题的解可以合并为该问题的解 
+\item[(4)] \underline{问题所分解出的子问题之间不包含公共子问题}   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{分治算法步骤}
+\begin{itemize}[<+-|alert@+>]
+\item 分(Divide): 将原始问题分解为较小的相同子问题 
+\item 治(Conquer): 递归解决这些子问题 
+\item 合并(Combine): 将较小子问题的解合并获得较大问题的解, 直到获得原始问题的解  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Ceilings 和 Floors 函数}
+\begin{itemize}[<+-|alert@+>]
+\item 对于任意实数 $x$, 取底函数(Floor) $\lfloor x \rfloor$ 表示不大于(小于或等于) $x$ 的最大整数, 取顶函数(Ceiling) $\lceil x \rceil$ 表示不小于(大于或等于)
+  $x$ 的最小整数, 对于任意实数 $x$,
+  \begin{eqnarray*}
+    \hspace{3cm}
+\boldsymbol{  x - 1 < \lfloor x \rfloor \leq  x \leq \lceil  x \rceil  < x +1}.
+\end{eqnarray*}
+\item 对于任意整数 $n$,
+  \begin{eqnarray*}
+        \hspace{3cm}
+\boldsymbol{  \lceil n/2 \rceil  + \lfloor n/2 \rfloor = n}.
+\end{eqnarray*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{分治法求和示例}
+\begin{itemize}[<+-|alert@+>]
+\item 问题: 计算 $n$ 个数字 $a_0,\ldots,a_{n-1}$ 的和. 
+\item 分\&治: 分别计算前 $\lfloor n/2 \rfloor$ 个数字的和以及计算后 $\lceil n/2 \rceil$ 个数字的和. 
+\item 合并: 将上述两个和相加, 得出原始问题答案: 
+  \begin{eqnarray*}
+ a_0+\cdots a_{n-1} = (a_0+\cdots a_{\lfloor n/2 \rfloor -1})+(a_{\lceil n/2 \rceil-1}+\cdots  a_{n-1}) 
+  \end{eqnarray*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{分治算法时间复杂性}
+\begin{itemize}[<+-|alert@+>]
+\item 使用递归思想解决问题  
+\item 主要技巧是问题分解、子问题求解、子问题解合并  
+\item 递归属性使其时间复杂性可表示为\underline{递归表达式}  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{分治算法时间复杂性公式}
+  \begin{exampleblock}{Time Complexity}
+    \begin{displaymath}
+\boldsymbol{T(n)= aT(\lceil n/b \rceil)+f(n)}
+\end{displaymath}
+\end{exampleblock}
+\begin{itemize}[<+-|alert@+>]
+\item $a\geq 1$: 每次分解时产生的子问题的个数 
+\item $b>1$: 每次分解时问题大小下降的因子 
+%\item $O(n^d)$ 是将 $a$ 个大小为 $n/b$ 的子问题合并的成本. 
+\item $f(n)$: 表示分解问题和合并子问题解的代价  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{主(Master)定理}
+\begin{theorem}[主定理]给定常数 $a\geq 1$,  $b>1$,  $d\geq 0$,  假设 $n=b^k (k=1,2,\ldots$), 如果 $f(n) =
+  \Theta(n^d)$, 即 
+
+$T(n)=aT(\lceil n/b \rceil)+\Theta(n^d)$,  则
+  \begin{eqnarray*}
+    T(n) = \left\{
+        \begin{array}{ll}
+          \Theta(n^d) &\qquad  \mathrm{if}\ a < b^d   \\
+\Theta(n^d\log n) &\qquad  \mathrm{if} \ a = b^d   \\
+\Theta(n^{\log_ba}) &\qquad  \mathrm{if}\ a > b^d  
+        \end{array}
+\right. 
+  \end{eqnarray*}
+\end{theorem}
+ (对于 $O$ 和 $\Omega$ 符号来说类似结论成立)   
+\end{frame}
+
+\begin{frame}{Fun Time}
+  假设输入规模为 $n=2^k$, 采用主定理估算分治求和算法加法运算次数 $T(n)$.
+  \begin{exampleblock}{Time Complexity}
+      \begin{eqnarray*}
+ a_0+\cdots a_{n-1} = (a_0+\cdots a_{\lfloor n/2 \rfloor -1})+(a_{\lceil n/2 \rceil}+\cdots  a_{n-1})
+      \end{eqnarray*}
+    \end{exampleblock}
+    \begin{exampleblock}{Master}
+          \begin{eqnarray*}
+    T(n) = \left\{
+        \begin{array}{ll}
+          \Theta(n^d) &\qquad  if\ a < b^d  \\
+\Theta(n^d\log n) &\qquad  if \ a = b^d  \\
+\Theta(n^{\log_ba}) &\qquad  if\ a > b^d
+        \end{array}
+\right. 
+          \end{eqnarray*}
+        \end{exampleblock}
+      \end{frame}
+
+\begin{frame}{Fun Time}
+\begin{itemize}[<+-|alert@+>]
+\item 输入规模为 $n=2^k$ 时, 加法运算次数 $T(n)$ 可用如下递推公式表示:
+  \begin{eqnarray*}
+    T(n)=2T(n/2)+O(1)     
+  \end{eqnarray*}
+
+\item 其中, $a=2$, $b=2$, $d=0$. 因为 $a>b^d$, 有 
+  \begin{eqnarray*}
+    T(n)\in \Theta(n^{\log_ba})=\Theta(n^{\log_22})=\Theta(n). 
+  \end{eqnarray*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{2.3 二分搜索技术}
+  \begin{exampleblock}{查找问题}
+给定按升序排序的~$n$~个元素~$A[0..n-1]$, 在~$n$~个元素中找出一特定元
+素~$x$.
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{分治法解决问题一般特征} 
+\begin{itemize}[<+-|alert@+>]
+\item[(1)]问题的规模缩小到一定程度就可以容易地解决
+\item[(2)] 问题可分解为若干规模较小的相同子问题
+\item[(3)] 利用子问题的解可以合并为该问题的解
+\item[(4)] {问题所分解出的子问题之间不包含公共子问题} 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{2. 查找问题满足分治策略的条件判定}
+\begin{itemize}[<+-|alert@+>]
+\item[(1)] 如果 $n=1$, 则只要比较这个元素和 $x$ 就可以确定 $x$ 是否存在(条件1成立).
+\item[(2)] 比较 $x$ 和 $A$ 的中间元素 $A[m]$, 若 $x=A[m]$, 则 $x$ 在 $A$ 中的位置是 $m$; 若 $x<A[m]$, 则在 $A[0..m-1]$ 中查找 $x$; 若 $x>A[m]$, 则在 $A[m+1..n]$ 中查找 $x$(条件2,3成立).
+\item[(3)] 问题分解出的子问题相互独立(条件4成立).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{3. 算法思想} 
+二分搜索通过比较查找键 $x$ 和数组中间元素$A[m]$ 来完成\underline{有序数组}元素查找工作 
+% 如果它们相等, 算法结束. 否则, 如果 $x<A[m]$, 就对数组的前半部分执行该操作, 如果 $x>A[m]$, 则对数组的后半部分执行该操作. 
+\begin{exampleblock}{}
+  \begin{eqnarray*}
+\underbrace{A[0]\cdots A[m-1]}_{ if\ x<A[m]} & \boldsymbol{A[m]} & \underbrace{A[m+1]\cdots A[n-1]}_{if\ x>A[m]}  
+\end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{4. 二分搜索算法}
+\textbf{binary\_search}$(A, k, l, r)$:\\
+\qquad    \textbf{if} $l > r$: \textbf{return} $-1$\\
+\qquad    $m = (l+r)/2$\\
+\qquad      \textbf{if} $k == A[m]$: \textbf{return} $m$ \\
+\qquad      \textbf{elif} $k < A[m]$: \\
+\qquad \qquad \textbf{return} \textbf{binary\_search}$(A, k, l, m-1)$ \\
+\qquad     \textbf{else}: \\
+\qquad \textbf{return} \textbf{binary\_search}$(A, k, m+1, r)$
+\end{frame}
+
+\begin{frame}{5. 二分搜索算法时间复杂性分析}
+  \begin{exampleblock}{Time Complexity}
+    \begin{eqnarray*}
+  T(n) & = & aT(n/b)+f(n) \\
+   & = & T(n/2)+O(1)  
+ \end{eqnarray*}
+其中, $a = 1, b=2, n^d=1$, 即 $d = 0$, 由于有 $a  = b^d$ 成立, 根据主定理, 
+\begin{eqnarray*}
+   \Rightarrow    T(n) & = &   O(n^d \log n)  \\
+                       & = & O(n^0 {\log n}) \\    
+                       &  = & O(\log n) 
+\end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{6. 二分搜索算法实例}
+  $x=70$, 对下面的数组应用二分搜索算法.
+  \begin{table}[!htbp]
+%\caption{二分搜索算法的例子}
+    \centering
+%    \begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|l|l|}
+\begin{tabular}{lccccccccccccc}
+      下标 & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12\\
+\hline
+值  & 3  & 14 & 27 & 31 & 39 & 42 & 55 & 70 & 74 & 81 & 85 & 93 & 98\\
+\hline
+(1) & $l$ & & & & & & $m$ & & & & & & $r$\\
+(2) &     & & & & & &     & $l$ & & $m$ & & & $r$ \\
+(3)  &     & & & & & &     & $l,m$ & $r$ &  & & &    \\
+
+      \hline 
+      \end{tabular}
+  \end{table}
+(1): $m = (l+r)/2 = 6$, $x> A[m]$, $l = m+1$;  \\
+(2): $m= (l+r)/2 = 9$, $x < A[m]$,  $r = m-1$;  \\
+(3): $m = (l+r)/2 = 7$, $x=A[m]$, \textbf{return} $m$.
+\end{frame}
+
+\begin{frame}{2.4 大整数乘法}
+研究高效的大整数乘法算法的具有广泛的现实需求
+\begin{itemize}[<+-|alert@+>]
+\item \textsf{int}:　-32768－32767 范围的整数 
+\item \textsf{unsigned int}:　0－65535 范围的正整数  
+\item \textsf{long}: -2147483648－2147483647 的整数  
+\item \textsf{unsigned long}: 0－4294967295 的正整数 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{笔算算法}
+两个
+$n$ 位整数相乘, 第一个数中的 $n$ 个数字都分别被第二个数中的 $n$ 个数字相乘, 这样就一共要做 $n^2$ 次乘法.  
+\begin{table}
+\centering
+\begin{tabular}{c}
+\qquad  2 3 \\
+$\times$ \quad 1 4\\
+\hline
+\qquad 9 2\\
+ 2 3\\
+\hline
+\quad 3 2 2  
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{整数相乘例子}
+\textbf{例2.} 整数 $23$ 和 $14$ 相乘. 这两个数字可以这样表示:
+\begin{exampleblock}{}  
+ \begin{eqnarray*}
+      23 & = & 2\times 10^1 + 3\times 10^0\\
+     14 & = & 1\times 10^1 + 4\times 10^0 
+ \end{eqnarray*}
+\end{exampleblock}
+现在把它们相乘: 
+\begin{exampleblock}{}
+   \begin{eqnarray*}
+   23 \times 14 &  = & (2\times 10^1 + 3\times 10^0) \times (1\times 10^1 + 4\times 10^0)   \\
+ & = & (2\times 1)10^2+(2\times 4+3\times 1)10^1+(3\times 4)10^0 
+   \end{eqnarray*}
+ \end{exampleblock}
+ 产生一个正确的结果 $322$, 但使用了 $4$ 次乘法.  
+\end{frame}
+
+\begin{frame}{整数相乘算法}
+设 $X$ 和 $Y$ 都是 $n$ 位二进制数, 计算它们的乘积 $XY$.  将 $X$ 和 $Y$
+都分为2段, 每段的长为 $n/2$ 位(假设 $n$ 是 2 的幂)
+\begin{exampleblock}{}
+  \begin{displaymath}
+X=\underbrace{  \quad A \quad }_{n/2\ bit} \quad \underbrace{  \quad B \quad }_{n/2\ bit}\ ,  \quad Y=\underbrace{  \quad C \quad }_{n/2\ bit} \quad \underbrace{  \quad D \quad }_{n/2\ bit} 
+\end{displaymath}
+由此,  $X = A 2^{n/2} + B$, $Y = C 2^{n/2} + D$.   
+
+例如, $x = 10110110$, $x_L = 1011$, $x_R = 0110$, 则   \\
+$x = 1011\times 2^4 + 0110$. 
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{}
+  $X$ 和 $Y$ 的乘积为
+  \begin{exampleblock}{}
+    \begin{eqnarray*}
+  XY & = & (A 2^{n/2} + B)(C 2^{n/2} + D)\\
+& = & AC2^n+(AD+BC)2^{n/2}+BD
+\end{eqnarray*}
+计算 $XY$, 需要进行4次 $n/2$ 位整数的乘法,  以及3次整数加法, 还要做2次移位. 所有这些加法和移位共用 $O(n)$ 步运算  
+\begin{eqnarray*}
+  T(n) = \left\{\begin{array}{ll} 
+O(1) & n = 1     \\
+4T(n/2)+O(n) & n > 1  
+\end{array} \right. 
+\end{eqnarray*}
+\end{exampleblock}
+根据主定理得出 $T(n)=O(n^2)$.  
+\end{frame}
+
+\begin{frame}{高斯发现}
+德国数学家 \emph{Carl Friedrich Gauss}(1777-1855) 很早就发现, 两个复数
+乘法初看上去涉及 4 次乘法, 但实际上可以化简为 3 次乘法运算  
+\begin{exampleblock}{}
+  \begin{eqnarray*}
+  (a+bi)(c+di) = ac - bd +(bc+ad)i   \\
+bc + ad = (a+b)(c+d)-ac-bd. 
+\end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{两数相乘 3 次乘法公式}
+对于任何两位数 $a=a_1a_0$ 和 $b=b_1b_0$, 它们的积 $c$ 可以用这个公式来
+计算:
+\begin{exampleblock}{}
+  \begin{displaymath}
+  c=a\times b=c_210^2+c_110^1+c_0  
+\end{displaymath}
+其中, $c_2=a_1\times b_1$ 是第一个数字的积, $c_0=a_0\times b_0$ 是第二个数字的积, $c_1=(a_1+a_0)\times (b_1+b_0)  -(c_2+c_0)$ 是 $a$ 数字和与 $b$ 数字和的积减去 $c_2$ 与 $c_0$ 的和 
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{$23 \times 14$ 的 3 次乘法运算}
+  \begin{exampleblock}{}
+     \begin{eqnarray*}
+   23 \times 14 &  = & (2\times 10^1 + 3\times 10^0) \times (1\times 10^1 + 4\times 10^0)   \\
+ & = & (2\times 1)10^2+(2\times 4+3\times 1)10^1+(3\times 4)10^0 
+     \end{eqnarray*}
+   \end{exampleblock}
+   根据公式,　$c_2 = a_1\times b_1=2\times 1$,   $c_0=a_0\times
+   b_0=3\times 4$,    $c_1=(a_1+a_0)\times (b_1+b_0)-(c_2+c_0)$
+   得出 
+   
+\begin{displaymath}
+  2\times 4 + 3\times 1 = (2+3)\times (1+4)-(2\times 1)-(3\times 4) 
+\end{displaymath}
+\end{frame}
+
+\begin{frame}{改进算法}
+设 $X$ 和 $Y$ 都是 $n$ 位二进制数, 计算它们的乘积 $XY$. $X = A 2^{n/2} + B$, $Y = C 2^{n/2} + D$.
+把 $XY$ 写成另一种形式
+
+\begin{eqnarray*}
+  XY=AC2^n+((A+B)(C+D)-AC-BD))2^{n/2}+BD  
+\end{eqnarray*}
+上式只需做 3 次 $n/2$ 位整数的乘法, 6 次加、减法和 2 次移位.
+\end{frame}
+
+\begin{frame}{Fun Time}
+写出改进算法时间复杂性递归公式(做 3 次 $n/2$ 位整数的乘法, 6 次加、减法和 2 次移位
+), 并用主定理计算 $T(n)$.
+\begin{theorem}[主定理]
+  \begin{eqnarray*}
+    T(n) = \left\{
+        \begin{array}{ll}
+          \Theta(n^d) &\qquad  if\ a < b^d  \\
+\Theta(n^d\log n) &\qquad  if \ a = b^d  \\
+\Theta(n^{\log_ba}) &\qquad  if\ a > b^d
+        \end{array}
+\right. 
+  \end{eqnarray*}
+\end{theorem}
+\end{frame}
+
+\begin{frame}{Fun Time}
+  \begin{exampleblock}{}
+    \begin{eqnarray*}
+  T(n)=\left\{\begin{array}{ll}
+O(1) & n = 1   \\
+3T(n/2)+O(n) & n>1   
+\end{array} \right. 
+    \end{eqnarray*}
+  \end{exampleblock}
+  其解为 $T(n)=O(n^{\log_2 3})=O(n^{1. 59})$.  
+\end{frame}
+
+\begin{frame}{2.5 Strassen 矩阵乘法}
+\begin{itemize}[<+-|alert@+>]
+\item 设 $A$ 和 $B$ 是两个 $n\times n$ 矩阵, 它们的乘积 $C$ 是一个
+  $n\times n$ 矩阵. 乘积矩阵 $C$ 中元素 $c_{ij}$ 定义为
+  
+\begin{eqnarray*}
+  c_{ij}=\sum_{k=1}^na_{ik}b_{kj} 
+\end{eqnarray*}
+\item 计算矩阵乘积 $C$, 每计算一个 $c_{ij}$, 需要做 $n$ 次乘法和 $n-1$ 次加法, 因此, 求出矩阵 $C$ 的 $n^2$ 个元素所需的时间为 $O(n^3)$ 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Strassen 分治法}
+\begin{itemize}[<+-|alert@+>]
+\item 德国数学家 Volker Strassen 在
+ 1969 年提出采用分治方法, 将矩阵 $A$, $B$ 和 $C$ 中每一矩阵都分块成4个大小相等的子矩阵, 每个子矩阵都是 $n/2\times n/2$ 的方阵  
+
+ 可将方程 $C=AB$ 重写为:  
+ \begin{exampleblock}{}   
+\begin{eqnarray*}
+  \left[\begin{array}{cc}
+C_{11} & C_{12} \\
+C_{21} & C_{22}
+\end{array} \right]= \left[\begin{array}{cc}
+A_{11} & A_{12} \\
+A_{21} & A_{22}
+\end{array} \right]  \left[\begin{array}{cc}
+B_{11} & B_{12} \\
+B_{21} & B_{22}
+\end{array} \right] 
+\end{eqnarray*}
+\end{exampleblock}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{}
+  由此可得
+  \begin{exampleblock}{}
+    \begin{eqnarray*}
+  C_{11} & = & A_{11}B_{11}+A_{12}B_{21}\\
+  C_{12} & = & A_{11}B_{12}+A_{12}B_{22}\\
+  C_{21} & = & A_{21}B_{11}+A_{22}B_{21}\\
+  C_{22} & = & A_{21}B_{12}+A_{22}B_{22} 
+    \end{eqnarray*}
+  \end{exampleblock}
+  \begin{itemize}[<+-|alert@+>]
+\item 如果 $n=2$, 则 2 个 2 阶方阵的乘积共需 8 次乘法和 4 次加法  
+\item 当子矩阵的阶大于 2 时, 可以继续将子矩阵分块, 直到子矩阵的阶降为 2  
+\end{itemize}
+% 由此,产生了分治降阶的递归算法. 
+\end{frame}
+
+\begin{frame}{Strassen 矩阵乘积算法复杂性分析}
+计算 2 个 $n$ 阶方阵的乘积转化为计算 8 个 $n/2$ 阶方阵的乘积和 4 个
+$n/2$ 阶方阵的加法. 2 个 $n/2\times n/2$ 矩阵的加法可以在 $O(n^2)$ 时
+间内完成.  
+\begin{exampleblock}{}
+  \begin{eqnarray*}
+  T(n)=\left\{\begin{array}{ll}
+O(1) & n=2   \\
+8T(n/2)+O(n^2) & n > 2  
+\end{array} \right. 
+\end{eqnarray*}
+\end{exampleblock}
+该递归方程的解是 $T(n)=O(n^3)$. 
+\end{frame}
+
+\begin{frame}{Strassen 矩阵乘积改进算法}
+                 %                  
+  \begin{exampleblock}{Volker Strassen 算法}
+\begin{eqnarray*}
+  M_1 & = & A_{11}(B_{12}-B_{22})   \\
+  M_2 & = & (A_{11}+A_{12})B_{22}  \\
+  M_3 & = & (A_{21}+A_{22})B_{11}  \\
+  M_4 & = & A_{22}(B_{21}-B_{11})   \\
+  M_5 & = & (A_{11}+A_{22})(B_{11}+B_{22})   \\
+  M_6 & = & (A_{12}-A_{22})(B_{21}+B_{22})  \\
+  M_7 & = & (A_{11}-A_{21})(B_{11}+B_{12})  
+\end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Strassen 矩阵乘积改进算法}
+  \begin{exampleblock}{}
+    \begin{eqnarray*}
+  C_{11} & = & M_5+M_4-M_2+M_6   \\
+C_{12} & = & M_1+M_2   \\
+C_{21} & = & M_3+M_4   \\
+C_{22} & = & M_5+M_1-M_3-M_7   
+\end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time}
+ Strassen 矩阵乘法中, 用了7次 $n/2$ 阶方阵乘积和18次 $n/2$ 阶方阵的加减法,
+ 分析该算法计算时间 $T(n)$:
+ \begin{exampleblock}{}
+     \begin{eqnarray*}
+    T(n) = \left\{
+        \begin{array}{ll}
+          \Theta(n^d) &\qquad  if\ a < b^d  \\
+\Theta(n^d\log n) &\qquad  if \ a = b^d  \\
+\Theta(n^{\log_ba}) &\qquad  if\ a > b^d
+        \end{array}
+\right. 
+  \end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{改进算法复杂性分析}
+\begin{itemize}[<+-|alert@+>]
+\item Strassen 矩阵乘法中, 用了7次 $n/2$ 阶方阵乘积和18次 $n/2$ 阶方阵
+  的加减法, 该算法计算时间 $T(n)$:  
+  \begin{exampleblock}{}
+\begin{eqnarray*}
+  T(n)= \left\{
+    \begin{array}{ll}
+       O(1) & n=2   \\
+      7T(n/2)+O(n^2) & n>2        
+    \end{array}\right. 
+\end{eqnarray*}
+\end{exampleblock}
+\item 解此递归方程得 $T(n)=O(n^{\log_2 7})\approx O(n^{2. 81})$.  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{2.7 合并排序}
+  \begin{exampleblock}{排序问题}
+    给定长度为 $n$ 的一个数组, 设计一个有效的排序算法, 产生输入数组的
+    一个重排, 使数组元素按从小到大的顺序排列.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{合并排序算法基本思想}
+\begin{itemize}[<+-|alert@+>]
+\item[(1)]  将待排序数组 $A[0,n-1]$ 分成大小大致相同的 2 个子数组 $A[0,\lfloor n/2\rfloor-1]$ 和 $A[\lfloor n/2\rfloor,n-1]$   
+\item [(2)] 分别对 2 个子数组进行排序   
+\item [(3)] 将排好序的子数组合并成为一个有序数组   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{\textsf{MERGESORT} 算法}
+\textbf{\textsc{MERGESORT}}$(A)$\\
+1\quad \textbf{if} $len(A) <=1 $ \textbf{return} $A$ \\
+2\quad  $q\gets len(A)/2$\\
+3\quad  $L\gets A[0..q]$, $R\gets A[q+1..len(A)-1]$ \\
+4\quad  $L \gets$ \textsf{MERGESORT}$(L)$\\
+5\quad  $R \gets$ \textsf{MERGESORT}$(R)$\\
+6\quad  \textbf{return} \textsf{MERGE}$(L, R)$\\
+\end{frame}
+
+\begin{frame}{合并排序操作过程}
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{./pictures/mergesort.png}%
+%  \caption{合并操作序列}%
+\end{figure}
+\end{frame}
+
+\begin{frame}{\textsf{MERGE} 算法}
+\textbf{\textsc{MERGE}}($L, R$)\\
+1\quad $i \gets 0, j \gets 0, aux \gets [\ ]$ \\
+2\quad \textbf{while} $i < len(L)$ and $j < len(R)$\\
+3\quad \quad \textbf{if} $L[i]\leq R[j]$\\
+4\qquad \qquad  $aux.add(L[i])$ ; $i\gets i+1$\\
+5\qquad  \textbf{else} $aux.add(R[j])$ ; $j\gets j+1$\\
+6\qquad  \textbf{if} $i == len(L)$ \\
+7\qquad  \qquad $aux.add(R[j:len(R)-1])$ \\
+8\qquad  \textbf{else}  $aux.add(L[i:len(L)-1])$  \\
+9\quad \textbf{return} $aux$
+\end{frame}
+
+\begin{frame}{Fun Time}
+分析合并排序算法时间复杂性.
+\begin{exampleblock}{}
+  \begin{displaymath}
+   T(n)=aT(\lceil n/b \rceil)+\Theta(n^d)
+ \end{displaymath}
+\end{exampleblock}
+\begin{exampleblock}{}
+  \begin{eqnarray*}
+    T(n) = \left\{
+        \begin{array}{ll}
+          \Theta(n^d) &\qquad  \mathrm{if}\ a < b^d   \\
+\Theta(n^d\log n) &\qquad  \mathrm{if} \ a = b^d   \\
+\Theta(n^{\log_ba}) &\qquad  \mathrm{if}\ a > b^d  
+        \end{array}
+\right. 
+  \end{eqnarray*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time}
+\begin{itemize}[<+-|alert@+>]
+%\item 算法 \textsf{MERGE} 每一次递归调用需要完成一次键值比较, 比较之后, 两个数组中尚需处理的元素总数个数减一, 因此, 可在 $O(n)$ 时间内完成, 
+\item 合并排序算法最坏时间复杂性 $T(n)$ 满足 
+  \begin{exampleblock}{}
+    \begin{eqnarray*}
+  T(n) = \left\{
+    \begin{array}{ll}
+      O(1) & n = 1   \\
+2T(n/2)+O(n) & n > 1   
+    \end{array}\right. 
+\end{eqnarray*}
+\end{exampleblock}
+\item 根据主定理, 得出 $T(n)=O(n\log n)$.  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{2.8 快速排序}
+\begin{itemize}[<+-|alert@+>]
+\item 算法思想: 对给定数组中的元素进行重新排列, 确定数组中元素的一个位置 $q$, 得到一个快速排序的划分
+%, 在一个划分中, 所有在 $s$ 下标之前的元素都小于等于 $A[s]$, 所有在
+               %                $s$ 下标之后的元素都大于等于 $A[s]$ 
+  \begin{exampleblock}{}
+\begin{eqnarray*}
+\underbrace{A[0]\cdots A[q]}_{ \leq A[q]} & A[q] & \underbrace{A[q+1]\cdots A[n-1]}_{\geq A[q]}  
+\end{eqnarray*}
+\end{exampleblock}
+\item 建立一个划分之后, $A[q]$ 已经位于它在有序数组中的最终位置, 接下来需要继续对 $A[q]$ 前和 $A[q]$ 后的子数组分别进行快速排序 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{\textsf{QUICKSORT} 算法}
+\textbf{QUICKSORT}$(A,p,r)$\\
+1\qquad\   \textbf{if} $p < r$\\
+2\qquad\ \textbf{then} $q\gets$  \textsf{PARTITION}$(A,p,r)$\\
+3\qquad\ \qquad\ \textsf{QUICKSORT}$(A,p,q)$\\
+4\qquad\ \qquad\  \textsf{QUICKSORT}$(A,q + 1,r)$
+\end{frame}
+
+\begin{frame}{快速排序算法的例子}
+\begin{table}
+%\footnotesize{
+  \centering
+  \begin{tabular}{lllllllll}
+& 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\
+\hline
+(a) & {\textbf{5}} & $3^i$ & 1 & 9 & 8 & 2 & 4 & $7^j$    \\
+(b) & {\textbf{5}} & 3 & 1 & \underline{$9^i$} & 8 & 2 & \underline{$4^j$} & 7   \\
+(c) & {\textbf{5}} & 3 & 1 & $4^i$ & 8 & 2 & $9^j$ & 7   \\
+(d) & {\textbf{5}} & 3 & 1 & 4 & \underline{$8^i$} & \underline{$2^j$} & 9 & 7   \\
+(e) & {\textbf{5}} & 3 & 1 & 4 & $2^i$ & $8^j$ & 9 & 7   \\
+(f) & {\textbf{5}} & 3 & 1 & 4 & \underline{$2^j$} & $8^i$ & 9 & 7   \\    
+(g) & \underline{2} & 3 & 1 & 4 & \underline{{\textbf{5}}} &  8 & 9 & 7   \\
+\\
+%(h) & {\textbf{2}} & $3^i$ & 1 & $4^j$ & & & & \\
+%(i) & {\textbf{2}} & $3^i$ & $1^j$ & 4 & & & & \\
+%(j) & {\textbf{2}} & $1^i$ & $3^j$ & 4 & & & & \\
+%(k) & {\textbf{2}} & $1^j$ & $3^i$ & 4 & & & & \\
+%(l) & 1 & {\textbf{2}}  & 3 & 4 & & & & \\
+%(m) & 1 &  &  &  & & & & \\
+%(n) &  &  & {\textbf{3}}  & $4^{ij}$ & & & & \\
+%(o) &  & &  {$\textbf{3}^j$}  &  $4^i$ & & & & \\
+%(p) &  & &  & 4 & & & & \\
+   \end{tabular}
+ % \caption{快速排序算法的例子}
+%}
+\end{table}
+\end{frame}
+
+\begin{frame}{\textsf{PARTITION} 算法}
+\textbf{PARTITION}$(A,p,r)$\\
+1\qquad\  $x\gets  A[p]$, $i\gets  p+1$,   $j\gets  r$\\
+2\qquad\  \textbf{while} $i \leq j$ \\
+3\qquad\  \qquad \textbf{while} $A[j]\geq  x$ and $j > p$\\
+4\qquad\  \qquad \qquad     $j\gets j-1$\\
+5\qquad\ \qquad  \textbf{while}    $A[i]\le  x$ and $i < r$\\
+6\qquad\  \qquad \qquad  $i\gets i+1$ \\
+7\qquad\  \qquad       \textbf{if} $i < j$   \textbf{then}  $A[i]\leftrightarrow  A[j]$\\
+8\qquad\ \qquad  \qquad $i\gets i+1$, $j\gets j-1$\\
+9\qquad\   $A[p]\leftrightarrow A[j]$,  \textbf{return} $j$\\
+\end{frame}
+
+\begin{frame}{快速排序算法复杂性分析}
+快速排序算法的运行时间依赖于:
+\begin{itemize}[<+-|alert@+>]
+\item 划分的平衡与否 
+\item 划分的平衡与否依赖于算法的输入 
+\item 如果划分平衡, 时间复杂性为 $\Theta(n\log n)$ 
+\item 如果划分不平衡, 时间复杂性为 $\Theta(n^2)$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{最坏时间复杂性}
+ \textsc{Quicksort} 的最坏情况发生在 \textsc{Partition} 输出的两
+  个区域中, 一个仅包含 1 个元素, 另一个包含 $n-1$ 个元素的情况;假设上
+  述不平衡的划分发生在算法的每一步迭代中, 则
+  \begin{exampleblock}{}
+      \begin{displaymath}
+    T(n)=\left\{\begin{array}{ll}
+O(1) & n\leq 1   \\
+T(n-1)+O(n) & n > 1   
+\end{array}\right. 
+\end{displaymath}
+\end{exampleblock}
+\end{frame}
+
+% \begin{frame}{Fun Time}
+% 解递归式：
+% \begin{exampleblock}
+%     \begin{displaymath}
+%     T(n)=\left\{\begin{array}{ll}
+% O(1) & n\leq 1   \\
+% T(n-1)+O(n) & n > 1   
+% \end{array}\right. 
+% \end{displaymath}
+% \end{exampleblock}
+% \end{frame}
+% %
+% %\item 解递归式, 可以得出 $T(n) = O(n^2)$. 
+
+% %注意: 算法的 $O(n^2)$ 运行时间发生在输入序列已经有序的情况. 
+
+% \begin{frame}{最优时间复杂性}
+%   \begin{itemize}[<+-|alert@+>]
+%   \item 设如果\textsc{Partition} 算法产生两个大小为 $n/2$ 的区域, 则 
+% \begin{displaymath}
+%   T(n) = 2T(n/2) + O(n) 
+% \end{displaymath}
+% \item 根据主定理, 可以得出 
+% \begin{displaymath}
+%   T(n) = O(n\lg n).  
+% \end{displaymath}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}{随机化快速排序算法}
+\begin{itemize}[<+-|alert@+>]
+\item 快速排序算法取决于划分的对称性  
+\item 采用随机策略进行划分  
+\item 算法每一步在数组 $A[p,r]$ 中随机选出一个元素作为划分元素, 可以期望划分是较对称的 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{\textsf{RANDOMIZED-PARTITION}算法}
+
+\textsf{RANDOMIZED-PARTITION}$(A,p,r)$\\
+1\qquad  $i$=\textsf{Random}$(p,r)$  \\
+2 \qquad exchange $A[p]\leftrightarrow A[i]$ \\
+3 \qquad Return \textsf{PARTITION}$(A,p,r)$
+\end{frame}
+
+\begin{frame}{\textsf{RANDOMIZED-QUICKSORT}算法}
+\textsf{ RANDOMIZED-QUICKSORT}$(A,p,r)$\\
+1\qquad \textbf{if} $p< r$\\
+2\qquad  \textbf{then} $q=$\textsf{RANDOMIZED-PATITION}$(A,p,r)$\\
+3\qquad \quad \textsf{RANDOMIZED-QUICKSORT}$(A,p,q)$\\
+4\qquad \quad  \textsf{RANDOMIZED-QUICKSORT}$(A,q+1,r)$
+\end{frame}
+
+\begin{frame}{本章小结}
+ \begin{itemize}[<+-|alert@+>]
+ \item 分治法是一种通用算法设计技术
+ \item 许多分治算法的时间复杂性 $T(n)$ 满足方程 
+   \begin{displaymath}
+     T(n)=aT(n/b)+f(n)
+   \end{displaymath}
+ \item (Master)主定理确定了该方程解的增长次数
+ \end{itemize}
+\end{frame}
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

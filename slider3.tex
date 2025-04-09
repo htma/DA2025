@@ -1,0 +1,1668 @@
+\documentclass[fontset=fandol,UTF8,fleqn]{beamer}
+% \usepackage[english]{babel}
+%\PassOptionsToPackage{quiet}{fontspec}
+\usepackage[UTF8]{ctex}
+%\usepackage{fontspec}
+
+%\usepackage[useregional]{datetime2}
+%\usepackage{mathtools,amsthm,amssymb,bm,amsmath,mathrsfs}
+\usepackage{amssymb,amsfonts,amsmath,amsthm,mathrsfs,mathptmx} %数学常用宏包
+\usepackage{ulem} % double underlines
+ \usepackage{graphicx}
+% \usepackage[backend=biber,style=authoryear]{biblatex}
+% \addbibresource{biblio.bib}
+
+\newcommand{\projdim}[1]{\mathbb{P}^#1}
+\newcommand{\esperanza}[1]{\mathbb{E}(#1)}
+\newcommand{\proba}[1]{\mathbb{P}(#1)}
+\newcommand{\gavilla}[2]{\mathcal{O}_{#1}(#2)}
+
+ \newcommand{\citap}[1]{\textcolor{blue}{(\cite{#1})}}
+
+% diagramas
+\usepackage{tikz, tikz-cd}
+\usepackage{pgf}
+\usetikzlibrary{cd, babel}  % evita errores en tikz
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{arrows,automata}
+
+
+% vertical separator macro
+\newcommand{\vsep}{
+  \column{0.0\textwidth}
+    \begin{tikzpicture}
+      \draw[very thick,black!10] (0,0) -- (0,7.3);
+    \end{tikzpicture}
+}
+
+% More space between lines in align
+\setlength{\mathindent}{0pt}
+
+% % Beamer theme
+ \usetheme{ZMBZFMK}
+\usefonttheme[onlysmall]{structurebold}
+\mode<presentation>
+\setbeamercovered{transparent=10}
+
+% align spacing
+\setlength{\jot}{0pt}
+
+ \setCJKmainfont[ItalicFont={AR PL UKai CN}]{AR PL UMing CN}
+%\setCJKmainfont[ItalicFont={AR PL UKai CN}]{SimSun}
+ \setCJKsansfont{SimSun}
+\setCJKmonofont{FangSong}
+
+% \AtBeginSection[]
+% {
+%   \begin{frame}
+%     \frametitle{Table of Contents}
+%     \tableofcontents[currentsection]
+%   \end{frame}
+% }
+% \AtBeginSubsection[]
+% {
+%   \begin{frame}
+%     \frametitle{Table of Contents}
+%     \tableofcontents[currentsubsection]
+%   \end{frame}
+% }
+
+
+% Only the first Slide
+\title{{算法设计与分析}}
+\author{MHT}
+\institute[Northeastern University at Qinhuangdao]{ }
+%\date{\today}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Dynamic Programming}
+
+\begin{frame}{第 3 章 动态规划}
+\begin{itemize}[<+-|alert@+>]
+\item 掌握动态规划算法的基本要素: \newline
+   最优子结构性质; 重叠子问题性质
+\item 掌握设计动态规划算法的步骤
+\item 矩阵连乘问题, 最长公共子序列, 背包问题,  最优二叉搜索树问题
+\end{itemize}
+\end{frame}
+
+\begin{frame}{动态规划(Dynamic Programming)的提出}
+\begin{itemize}[<+-|alert@+>]
+\item 20 世纪 50 年代由美国数学家{\textbf{Richard Bellman}}提出, 作为一种使多阶段决策过程最优的通用方法 
+\item ``Programming'' 是``计划''和``规划''的意思 
+\item 动态规划不仅是应用数学中用来解决某类\emph{优化问题}的重要工
+  具, 而且在计算机领域被当作一种通用的\emph{算法设计技术}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{优化问题(Optimization Problems)}
+  \begin{exampleblock}{最优解(the optimal solution)}
+    一个\emph{优化问题}可能有很多解, 每个解有一个代价, 选择一个具有最
+    优代价的解.     
+  \end{exampleblock} \pause
+\begin{itemize}[<+-|alert@+>]
+\item 动态规划提出的主要目是不仅要解决一个问题, 还要以最优的方式解决问题
+\item 针对特定问题寻求最优解.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{总体思想(分治思想)}
+\begin{itemize}[<+-|alert@+>]
+\item 将待求解问题分解成若干个子问题, 如果分解得到的子问题重复出现, 可用表格将已计算出的结果保存以节省重复计算, 从而降低时间复杂度 
+\item 动态规划适用于解决包含\emph{重叠子问题}的优化问题 
+\item 重叠子问题一般出现在对给定问题求解的递归关系中, 递归关系包含了更小子问题的解  
+  % \item 动态规划法建议, 与其对交叠子问题一次又一次地求解, 还不如对每个较小子问题只求解一次并把结果记录在表中, 这样就可以从表中得出原
+  %   始问题的解.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{动态规划基本步骤}
+\begin{itemize}[<+-|alert@+>]
+\item[(1)] 分析问题最优解的结构, 找出最优解的性质 ;
+\item[(2)] 递归地定义最优解的代价 ;
+\item[(3)] 以自底向上的方式计算出最优解的代价并保存 ;
+\item[(4)] 根据计算最优解的代价信息构造最优解.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{3.2 动态规划算法的基本要素}
+\begin{itemize}[<+-|alert@+>]
+\item \underline{最优子结构}~(Optimal substructure)
+\item 重叠子问题~(Overlapping subproblems)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{1. 最优子结构}
+\begin{definition}[最优子结构]
+  如果一个问题的最优解包含了它的子问题的最优解, 则称此问题具有\emph{最优子结构}.  
+\end{definition}\pause
+\begin{itemize}[<+-|alert@+>]
+\item 应用动态规划和贪心(Greedy)方法的条件 
+\item 是否满足重叠子问题条件  
+\end{itemize}
+\end{frame}
+% \begin{frame}[-.5in]{2. 子问题空间}
+% 理想情况下, 子问题空间越小越好, 可减少时间和空间复杂性. 在分析问题的结构时用循环方法可以得到一个好的子问题空间.  
+%   \begin{eqnarray*}
+%     (A_1\times \cdots \times A_n) & = & (A_1\times \cdots A_{k_1})\times (A_{k_1+1}\times \cdots A_n)   \\
+% & = & \bigg [(A_1\times \cdots A_{k_2})\times (A_{k_2+1}\times \cdots A_{k_1})\bigg]\times    \\
+% &  & \bigg[ (A_{k_1+1}\times \cdots A_{k_3})\times (A_{k_3+1}\times \cdots A_n) \bigg ]  \\
+% \cdots  
+%   \end{eqnarray*}
+% \begin{frame}[-.6in]{}
+% 最后得到子问题空间 $S=\{A_i\times A_{i+1}\times \cdots A_j|1\leq i \leq j \leq n\}$.
+
+% 计算~$S$~的大小,  ~$S$~包括:  
+
+% 长为~$1$~的矩阵子链~$n$~个,   \\
+% 长为~$2$~的矩阵子链~$n-1$~个,   \\
+% $\cdots$   \\
+% 长为~$n-1$~的矩阵子链~$2$~个,   \\
+% 长为~$n$~的矩阵子链~$1$~个,   \\
+% 于是, $S$~的大小为~$n(n+1)/2$.   \\
+% 即 $S$ 的大小为 $O(n^2)$. 
+
+\begin{frame}{2. 重叠子问题}
+
+\begin{definition}[重叠子问题]
+  如果递归算法求解一个优化问题时, 反复求解相同的子问题, 则称该优化问题有\emph{重叠子问题}.  
+\end{definition}\pause
+
+\textbf{动态规划与分治法的区别}： 
+\begin{itemize}[<+-|alert@+>]
+\item 动态规划只计算每个子问题一次并保存, 避免反复计算相同子问题多次  
+\item 分治法每次都产生新问题并计算, 而不管是否该问题已计算过  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{3. 备忘录方法-memoization}
+\begin{itemize}[<+-|alert@+>]
+\item 对函数返回值进行缓存(一种计算机程序优化技术)   
+\item 备忘录方法用表格保存已解决的子问题的答案, 在下次需要解此问题时, 只要简单地查看该子问题的解答, 而不必重新计算   
+\item 备忘录方法的递归方式是自顶向下, 而动态规划算法则是自底向上   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{动态规划与备忘录方法}
+  \begin{itemize}[<+-|alert@+>]
+  \item 动态规划: 一个问题的所有子问题都至少要解一次  
+  \item 备忘录方法: 部分子问题可不必求解    
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{3.1 矩阵连乘问题}
+\textbf{1. 矩阵连乘问题描述}
+  \begin{itemize}[<+-|alert@+>]
+\item 给定 $n$ 个矩阵 $\langle A_1, A_2,\ldots,A_n\rangle$, 其中 $A_i$ 和
+  $A_{i+1}$ 是可乘的, $i=1,2,\ldots, n-1$. 考虑这 $n$ 个矩阵的连乘积 $A_1\times
+  A_2\times \cdots \times A_n$的计算方法? 
+\item 计算矩阵的连乘可以有许多不同的计算次序 
+\item 这种计算次序可以用加括号的方式来确定 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{矩阵连乘例子}
+ 矩阵~$\langle A_1, A_2, A_3, A_4 \rangle$~的乘积有如下计算方法
+\begin{eqnarray*}
+A_1\times A_2\times A_3\times A_4 & = &  ((A_1\times A_2)\times A_3)\times A_4)
+  \\
+& = &((A_1\times A_2)\times (A_3\times A_4))  \\
+& = & ((A_1\times (A_2\times A_3))\times A_4)  \\
+& = & (A_1\times ((A_2\times A_3)\times A_4))  \\
+& = & (A_1\times (A_2\times (A_3\times A_4)))  \\
+\end{eqnarray*}
+\end{frame}
+
+\begin{frame}{两个矩阵乘积的代价}
+  \begin{itemize}[<+-|alert@+>]
+\item 复杂性度量:  计算矩阵乘积需要的乘法运算次数.  
+\item $A\times B$~的代价:  设~$A$~是~$p\times q$, $B$~是~$q\times r$~矩阵, 则其
+  乘积~$C=A\times B$~是一个 $p\times r$ 矩阵. 计算 $C$ 的标准算法时间复杂性是~$T(C) = O(?)$. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{矩阵乘法代价的例子}
+\begin{displaymath}
+  \mathbf{C}=\mathbf{A}_{p\times q}\times \mathbf{B}_{q\times r}=\left[ \begin{array}{ccc}
+1 & 2 & 3 \\
+4 & 5 & 6
+\end{array}
+\right ]_{2\times 3}
+\times \left[ \begin{array}{cc}
+1 & 2  \\
+3 & 4 \\
+5 & 6 
+\end{array}
+\right ]_{3\times 2} 
+\end{displaymath}
+\begin{displaymath}
+\small{
+  \mathbf{C}=\left[ \begin{array}{cc}
+(1\times 1+2\times 3+3\times 5) & (1\times 2+2\times 4+3\times 6)\\
+(4\times 1+5\times 3+6\times 5) & (4\times 2+5\times 4+6\times 6)\\
+\end{array}
+\right ]_{2\times 2} 
+}
+\end{displaymath}
+
+\begin{eqnarray*}
+    T(\mathbf{C})& = & O(2\times 3\times 2)  \\ 
+                 & = & O(pqr) 
+\end{eqnarray*}
+\end{frame}             
+
+\begin{frame}{Fun Time}
+ 设矩阵~$A_1, A_2, A_3$~分别为~$10\times 100$, $100\times 5$,  $5\times
+  50$~矩阵, 则
+
+$  T((A_1\times A_2) \times A_3) = ?$
+
+$T(A_1\times (A_2\times A_3))= ? $
+
+% \begin{frame}[-.3in]{Fun Time}
+% \begin{eqnarray*}
+%   T((A_1\times A_2) \times A_3)& = & 10\times 100\times 5 + 10\times 5\times 50  \\
+%                &  = & 5000+2500=7,500   \\
+% T(A_1\times (A_2\times A_3)) & = & 100\times 5\times 50 + 10\times 100\times 50  \\
+%              & = &25,000+50,000=75,000  
+% \end{eqnarray*}
+%  结论: 不同的矩阵乘积计算次序有不同的代价.  
+\end{frame}
+
+\begin{frame}{矩阵连乘优化问题}
+对于给定 $n$ 个矩阵 $\langle A_1, A_2, \ldots, A_n
+\rangle$(其中 $A_i$ 是 $p_{i-1}\times p_i$ 阶矩阵, $i=1,2,\ldots, n$), 如何确定代价最小的计算~$A_1\times A_2 \times \cdots \times A_n$~的计算次序, 即计算矩阵乘积
+所需的乘法次数最少?
+\end{frame}
+
+\begin{frame}{穷举法(Brute Force)}
+  \begin{itemize}[<+-|alert@+>]
+\item[(1)]  列举出所有可能的计算次序;  
+\item[(2)]  计算出每一种计算次序的代价;  
+\item[(3)]  从中找出一种乘法次数最少的计算次序. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{矩阵连乘优化问题的解空间}
+  \begin{itemize}[<+-|alert@+>]
+\item 对于 $n$ 个矩阵的连乘, 设~$P(n)$~是计算矩阵连乘积的方法数, 先在第 $k$ 个和第 $k+1$ 个矩阵之间将原矩阵序列分为两个矩阵子序列, $\underline{k=1,2,\ldots, n-1}$,  
+\begin{displaymath}
+ \underbrace{A_1 \cdots   A_k }_{k} \underbrace{A_{k+1} \cdots  A_n }_{n-k} 
+\end{displaymath}
+\begin{displaymath}
+    P(n)=\left\{\begin{array}{ll}
+1 & \textrm{if}\ n = 1\\
+\sum_{k=1}^{n-1}P(k)P(n-k) &  \textrm{if}\ n \geq 2
+\end{array}\right. 
+\end{displaymath}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{4 个矩阵连乘的计算方法数}
+考虑 $A_1\times A_2\times A_3 \times A_4$, 其计算方法数  
+\small{
+\begin{eqnarray*}
+  P(4) = \sum_{k=1}^3P(k)P(4-k) & = & P(1)P(3)+P(2)P(2)+P(3)P(1)  \\
+  P(3)  = \sum_{k=1}^2P(k)P(3-k) & = &  P(1)P(2)+P(2)P(1)  \\
+P(2) =  \sum_{k=1}^1P(k)P(2-k) & = & P(1)P(1)=1  
+\end{eqnarray*}
+}
+\end{frame}
+
+\begin{frame}{递归公式求解}
+\begin{eqnarray*}
+  P(n)=\left\{\begin{array}{ll}
+1 & \textrm{if}\ n = 1\\
+\sum_{k=1}^{n-1}P(k)P(n-k) &  \textrm{if}\ n \geq 2
+\end{array}\right. 
+\end{eqnarray*}
+$P(n)$ 为 Catalan 数, 即 $P(n)=C(n-1)$,  
+\begin{displaymath}
+  C(n)=\frac{1}{n+1} {2n \choose n}=\Omega(\frac{4^n}{n^{3/2}}). 
+\end{displaymath}
+ 结论: $P(n)$ 随 $n$ 的增长呈指数增长, 穷举法不是一个有效算法 
+\end{frame}
+
+\begin{frame}{动态规划基本步骤}
+  \begin{itemize}[<+-|alert@+>]
+\item[(1)] 分析问题最优解的结构, 找出最优解的性质 ;
+\item[(2)] 递归地定义最优解的代价 ;
+\item[(3)] 以自底向上的方式计算出最优解的代价并保存 ;
+\item[(4)] 根据计算最优解的代价信息构造最优解. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{2. 分析最优解的结构}
+  \begin{itemize}[<+-|alert@+>]
+\item 记号
+  \begin{itemize}
+\item $A_{i..j}=A_i\times A_{i+1}\times \ldots \times A_j$  
+\item $cost(A_{i..j})=$计算~$A_{i..j}$~的代价(乘法次数)  
+\end{itemize}
+
+\item 寻求计算 $A_{1..n}$ 的最优计算次序 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{最优解的结构}
+  \begin{itemize}[<+-|alert@+>]
+\item  对于任意~$k$, $1\leq k < n$, $A_{1..n}=A_{1..k}\times A_{k+1..n}$, 其代价为 
+\small{
+ \begin{displaymath}
+   cost(A_{1..n})=cost(A_{1..k})+cost(A_{k+1..n})+cost(A_{1..k}\times A_{k+1..n}) 
+ \end{displaymath}
+}
+
+\item 说明: 在~$A_{1..n}$~的最优解中, 子问题~$A_{1..k}$~的解必须是 $A_{1..k}$ 的最优解, 子问题~$A_{k+1..n}$~的解必须是~$A_{k+1..n}$~的最优解  
+\item \emph{原问题的最优解包含子问题的最优解}.   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{3. 重叠子问题}
+计算 $A_1\times A_2 \times A_3 \times A_4$ 的方法如下: 
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{./pictures/matrix-chain-multiply.png}%
+\end{figure}
+\end{frame}
+
+\begin{frame}{4. 最优解的代价方程}
+  \begin{itemize}[<+-|alert@+>]
+\item $m[i,j]=$~计算~$A_{i..j}$~的最小乘法数   
+\item $m[1,n]=$~计算~$A_{1..n}$~的最小乘法数  
+\item 假设存在 $k$, 满足 $A_1\cdots A_kA_{k+1}\cdots A_n$~是最优解  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{代价方程}
+  \begin{itemize}[<+-|alert@+>]
+\item[(1)] $i = j$ 时, $A_{i..i}=A_i$, $m[i,i]=0$, $(i=1,\ldots, n)$ 
+\item[(2)] $i<j$ 时,  $m[i,j]=m[i,k]+m[k+1,j]+\underline{p_{i-1}p_kp_j}$,  
+%其中,  $p_{i-1}p_kp_j$~是计算~$A_{i..k}A_{k+1..j}$~所需要完成的乘法数,  
+%  $A_i$~和~$A_k$~分别是~ $p_{i-1}\times p_i$~和~ $p_{k-1}\times p_k$~矩阵  
+\begin{eqnarray*}
+\small{
+  \label{eq:step2}
+  m[i,j]=\left\{\begin{array}{ll}
+0, & i = j\\
+\mathrm{min}_{i\leq k< j}\{m[i,k]+m[k+1,j]+p_{i-1}p_kp_j\}, &
+i<j
+\end{array}\right.} 
+\end{eqnarray*}
+令~$s[i,j]=k$, $k \in \{i, i+1, \cdots, j-1\}$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{5. 最优解代价方程的计算}
+\begin{eqnarray*}
+\small{
+  \label{eq:step2}
+  m[i,j]=\left\{\begin{array}{ll}
+0, & i = j,\\
+\mathrm{min}_{i\leq k< j}\{\underline{m[i,k]+m[k+1,j]}+p_{i-1}p_kp_j\}, &
+i<j
+\end{array}\right.} 
+\end{eqnarray*}
+例: 计算 $m[1,5]$. 
+\begin{table}
+  \centering
+  \begin{tabular}{lllll}
+    $m[1,1]$ & $m[1,2]$ & $m[1,3]$ & $m[1,4]$ & $\mathbf{m[1,5]}$  \\
+             & $m[2,2]$ & $m[2,3]$ & $m[2,4]$ & $m[2,5]$  \\
+             &          & $m[3,3]$ & $m[3,4]$ & $m[3,5]$  \\   
+             &          &          & $m[4,4]$ & $m[4,5]$  \\ 
+             &          &          &          & $m[5,5]$    
+  \end{tabular}
+\end{table}
+\end{frame}
+%
+%\begin{frame}{计算 $m[i,j]$ 的递归算法}
+%计算~$m[i,j]$\\
+%\textbf{if} $i = j$ then \textbf{return} 0\\
+%$m\gets \infty$\\
+%\textbf{for} $k\gets 1$ \textbf{to} $n-1$ \\
+%\hspace*{1cm} \textbf{do} $x=m[1,k]+m[k+1,n]+p_{i-1}p_kp_n$\\
+%\hspace*{1cm} \textbf{if} $x < m$ \textbf{then} $m \gets x$\\
+%\textbf{return} $m$
+
+%\begin{frame}[-.8in]{递归算法复杂性分析}
+%\begin{eqnarray*}
+%  T(n) & = & \sum_{k=1}^{n-1}(T(k)+T(n-k)+\Theta(1)\\
+%& = & \sum_{k=1}^{n-1}\Theta(1)+\sum_{k=1}^{n-1}(T(k)+T(n-k))\\
+%& = & \sum_{k=1}^{n-1}\Theta(1)+2\sum_{k=1}^{n-1}T(k)\\
+%& = & \Theta(n) + 2\sum_{k=1}^{n-1}T(k)\\
+%& \geq & \Theta(n)+2T(n-1)\\
+%& \geq & \Theta(n)+\Theta(n-1)+2^2T(n-2)\\
+%& \geq & \Theta(n)+\Theta(n-1)+\ldots + \Theta(1)+2^{n-1}T(1)\\
+%& \geq & \Theta(2^n)
+%\end{eqnarray*}
+
+%结论: 递归算法并不好于穷举算法. 
+
+\begin{frame}{6. 动态规划算法}
+数据结构
+  \begin{itemize}[<+-|alert@+>]
+\item 矩阵~$A_i: p_{i-1}\times p_i$, $i=1, 2, \ldots, n$  
+\item 一维数组~$p=[p_0,p_1,\ldots, p_n]$  
+\item 二维数组~$m[1..n, 1..n]$, 存储~$m[i,j]$  
+\item 二维数组~$s[1..n,1..n]$, 存储计算~$m[i,j]$~时确定的最优解对应的~$k$~值  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{算法基本思想}
+基本思想
+  \begin{itemize}[<+-|alert@+>]
+\item 对于~$i \le k < j$, $m[i,j]=min\{m[i,k]+m[k+1,j]+p_{i-1}p_kp_j$\}  
+\item 必须在计算~$m[i,j]$~之前计算出所有的 $m[i,k]$, $m[k+1,j]$, 并加以存储  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{} 
+\begin{quote}
+\small{
+\textsc{matrix-chain-multiplication}$(p)$.\\
+1 $n\gets  len(p) -1$\\
+2 \textbf{for} $i\gets 1$ \textbf{to} $n$\\
+3 \qquad   $m[i, i]\gets  0$\\
+4 \underline{\textbf{for} $l\gets 2$ \textbf{to} $n$} //$l$
+\textit{is the chain length}.\\
+5 \qquad \underline{\textbf{for} $i\gets 1$ \textbf{to} $n-l+1$}\\
+6 \qquad \qquad  $j\gets i + l-1$\\
+7 \qquad \qquad $m[i,j] = \infty$ \\
+8 \qquad \qquad  \underline{\textbf{for} $k\gets i$ \textbf{to} $j-1$}\\
+9 \qquad \qquad \qquad $q\gets m[i,k] + m[k + 1,j] +p_{i-1}p_kp_j$\\
+10 \qquad \qquad \qquad   \textbf{if} $q < m[i, j]$\\
+11\qquad \qquad \qquad  \qquad $m[i, j]\gets  q$, $s[i, j]\gets  k$\\
+12 \textbf{return} $m$ and $s$
+}
+\end{quote}
+\end{frame}
+
+\begin{frame}{复杂性分析}
+  \begin{itemize}[<+-|alert@+>]
+\item 时间复杂性~
+  \begin{eqnarray*}
+    T(n) & = & \sum_{l=2}^{n}\sum_{i=1}^{n-l+1}\sum_{k=i}^{j-1}1   \\
+         & = & O(n^3). 
+  \end{eqnarray*}
+\item 空间复杂性~$S(n)=O(n^2)$. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{7. 最优解的构造}
+  \begin{itemize}[<+-|alert@+>]
+\item $s[i,j]=k$, $k$~是最优计算~$A_i\times A_{i+1}\times \cdots \times A_j$~的划分~$(A_i\times \cdots A_k)\times (A_{k+1}\times \cdots \times A_j)$ ;
+\item $A_{1..n}$~的最优解由~$s[1,n]$~确定, 即~$A_{1..s[1,n]}\times A_{s[1,n]+1..n}$ ;
+\item $A_{1..s[1,n]}$~的最优解由~$s[1, s[1,n]]$~确定: \hspace*{3cm} ~$A_{1..s[1,s[1,n]]}\times A_{s[1,s[1,n]]+1..n}$ ;
+\item $A_{s[1,n]+1..n}$~的最优解由~$s[s[1,n]+1,n]$~确定: \hspace*{3cm} ~$A_{s[1,n]+1..s[1,s[1,n]]}\times A_{s[s[1,n]+1,n]..n}$ ;
+\item 可递归得到~$A_{1..n}$~的最优解.  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{最优解构造算法}
+\textsc{print-optimal-parens}$(s, i, j)$.\\
+1\qquad  \textbf{if} $i=j$\\
+2\qquad \textbf{then} print ``$A$''$_i$\\
+3\qquad \textbf{else} print ``(''\\
+4\qquad \qquad \textsc{print-optimal-parens}$(s,i,s[i,j])$\\
+5\qquad \qquad
+\textsc{print-optimal-parens}$(s,s[i,j]+1,j)$\\
+6\qquad\qquad print ``)''
+\end{frame}
+
+\begin{frame}{矩阵连乘例子}
+计算矩阵连乘积 $A_1\times A_2\times A_3\times A_4\times A_5\times A_6$, 其中各矩阵的维数分别为: 
+
+\begin{table}
+  \centering
+  \begin{tabular}{cccccc}
+\hline
+    $A_1$ & $A_2$ &     $A_3$ &     $A_4$ &     $A_5$ &     $A_6$ \\
+\hline
+$30\times 35$ & $35\times 15$ & $15\times 5$ & $5\times 10$ & $10\times 20$ & $20\times 25$    \\
+\hline
+  \end{tabular}
+\end{table}
+各矩阵的阶为 
+\begin{table}
+  \centering
+  \begin{tabular}{cccccc}
+\hline
+   $p_0$\qquad\ &  $p_1$\qquad\  & $p_2$\qquad\  &     $p_3$\qquad\  &
+   $p_4$\qquad\  &     $p_5$\qquad\  $p_6$\   \\
+\hline
+$30$\qquad\  & $35$\qquad\  & $15$\qquad\  & $5$\qquad\  & $10$\qquad\  & $20$\qquad\ $25$     \\
+\hline
+  \end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{计算 $m[i,j]$ 表}
+\begin{table}
+%\caption {主表}
+  \centering
+\large{
+  \begin{tabular}{lccccccc}
+& & & & $j$ & & & \\    
+&  & 1 & 2 & 3 & 4 & 5 & 6\\
+\hline
+& 1 & 0 & 15750 & 7875 & 9375 & 11875  & 15125\\
+& 2 & & 0 & 2625 & 4375 & [7125] & 10500\\
+$i$ & 3 & & & 0 & 750 & 2500 & 5375\\
+& 4 & & & & 0 & 1000 & 3500 \\
+& 5 &  &  & & &　0 & 5000\\
+& 6 & &　& & & & 0\\
+\hline
+  \end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{计算 $m[2,5]$}
+\begin{table}
+%\caption {主表}
+  \centering
+\large{
+  \begin{tabular}{lcc|c|c|c|c|c}
+\hline
+& & & & $j$ & & & \\    
+\hline
+&  &  & 2($k_1$) & 3($k_2$) & 4($k_3$) & 5 & \\
+\hline
+&  &  &  &  &  &   & \\
+\hline
+& 2 & & 0 & 2625 & 4375 & [?] & \\
+\hline
+$i$ & 3 & & & 0 & 750 & 2500 & \\
+\hline
+& 4 & & & & 0 & 1000 &  \\
+\hline
+& 5 &  &  & & &　0 & \\
+\hline
+&  & &　& & & & \\
+\hline
+  \end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{计算 $s[i,j]$ 表}
+\begin{table}
+%\caption {主表}
+  \centering
+\large{
+  \begin{tabular}{lcccccccc}
+& & & & $j$ & & & \\    
+&  & 1 & 2 & 3 & 4 & 5 & 6 & \\
+\hline
+& 1 & 0 & 1 & 1 & 3 & 3  & [3] & \\
+& 2 & & 0 & 2 & 3 & 3 & 3 &　\\
+$i$ & 3 & & & 0 & 3 & 3 & 3 &　\\
+& 4 & & & & 0 & 4 & 5 & \\
+& 5 &  &  & & & 0 & 5 & \\
+& 6 & &　& & & & 0 & \\
+\hline
+  \end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{Fun Time}
+计算$m[3,5]$, $p=[30, 35, 15, 5, 10, 20, 25]$.
+
+\begin{table}
+%\caption {主表}
+  \centering
+  \begin{tabular}{lccccccc}
+& & & & $j$ & & & \\    
+&  & 1 & 2 & 3 & 4 & 5 & 6\\
+\hline
+&  &  &  &  &  &   & \\
+&  & &  &  &  &  & \\
+$i$ & 3 & & & 0 & 750 & [???] & \\
+& 4 & & & & 0 & 1000 &  \\
+& 5 &  &  & & &　0 & \\
+&  & &　& & & & \\
+\hline
+  \end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{3.3 最长公共子序列}
+\textbf{1. 问题描述}  
+\begin{definition}[子序列]
+  设~$X =\langle x_1, x_2,\ldots,x_m \rangle$~是一个序列, 称序列 $Z = \langle z_1, z_2,\ldots \,z_k\rangle$~是~$X$~的一个子序列, 满足条件: \underline{存在一个严格递增序列 $\langle i_1,i_2,\ldots, i_k\rangle$}, 对于任意 $j = 1, 2, \ldots, k$, 有~$x_{i_j}
+  = z_j$~成立.  
+\end{definition}\pause
+例： $Z = \langle B, C, D, B\rangle$~是~ $X = \langle A, B, C, B, D, B\rangle$~
+的子序列, 相应递增下标序列为$\langle 2, 3, 5, 6\rangle$.  \pause
+
+序列 $W=\langle B, D, A \rangle$ 不是 $X$ 的子序列.  \pause
+\end{frame}
+
+\begin{frame}{公共子序列}
+\begin{definition}[公共子序列] 给定两序列~ $X$, $Y$, 称序列 ~$Z$ ~是~ $X$~和~ $Y$~的\underline{公共子序列}, 满足条件: $Z$~是~$X$ ~和~$Y$~的子序列. 
+\end{definition}
+  \begin{itemize}[<+-|alert@+>]
+\item $X =\langle A, B, C, B, D, A, B\rangle$, $Y =\langle B, D, C, A, $ $B, A\rangle$,    
+\item $Z=\langle B, C, A\rangle$ 是 $X$ 和 $Y$~的公共子序列.  
+\item 序列 $\langle B, C, B, A\rangle$ 是 $X$ 和 $Y$ 的\textbf{最长公共子序列}. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{最长公共子序列}  
+
+\begin{definition}[Longest Common Subsequence, LCS]
+给定序列 \\
+$X =\langle x_1, x_2,\ldots,x_m \rangle$,  ~$Y =\langle y_1, y_2,\ldots,y_n \rangle$, \\
+找出 $X$, $Y$~的最长公共子序列. 
+\end{definition}
+\end{frame}
+
+\begin{frame}{穷举法求解 LCS 问题}
+  \begin{itemize}[<+-|alert@+>]
+\item[(1)] 对于 $X$ 的所有子序列, 检查它是否也是 $Y$ 的子序列, 从而确定它是否为 $X$
+  和 $Y$ 的公共子序列;  
+\item[(2)]  并在检查过程中记录最长的公共子序列. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{LCS 解空间大小}
+  \begin{itemize}[<+-|alert@+>]
+\item $X = \langle A, B, C\rangle$ 子序列个数为? 
+\item  $X$ 的每个子序列相应于下标集 $\{1,2,\ldots, m\}$ 的一个子集 
+\item 共有 $2^m$ 个不同子序列, 从而穷举搜索法需要指数时间 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{动态规划基本步骤}
+  \begin{itemize}[<+-|alert@+>]
+\item[(1)] 分析问题最优解的结构, 找出最优解的性质; 
+\item[(2)] 递归地定义最优解的代价; 
+\item[(3)] 以自底向上的方式计算出最优解的代价并保存; 
+\item[(4)] 根据计算最优解的代价信息构造最优解. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{2. LCS~结构分析}
+\huge{
+\begin{quote}
+$ X = A\quad B \quad C \quad B \quad D \quad \mathbf{A}$   \\ \pause
+\vspace*{.5cm}
+$ Y = B\quad D \quad C \quad A \quad B \quad \mathbf{A}$   \\ \pause
+\vspace*{1cm}
+$\mathbf{ Z = B\quad C \quad B\quad A}$  \\ 
+\end{quote}
+}
+\end{frame}
+
+\begin{frame}{2. LCS~结构分析}
+\huge{
+\begin{quote}
+$ X = \underbrace{A\quad B \quad C \quad B \quad D} \quad \mathbf{A}$
+\\ \pause
+\vspace*{.5cm}
+$ Y = \underbrace{B\quad D \quad C \quad A \quad B} \quad \mathbf{A}$
+\\ \pause
+\vspace*{1cm}
+$\mathbf{ Z = B\quad C \quad B\quad + \quad A}$  \\ 
+\end{quote}
+}
+\end{frame}
+
+\begin{frame}{LCS~结构分析}
+\huge{
+\begin{quote}
+$ X' = A\quad B \quad C \quad B \quad \mathbf{D}$  \\ \pause
+\vspace*{.5cm}
+$ Y' = B\quad D \quad C \quad A \quad \mathbf{B}$   \\ \pause
+\vspace*{1cm}
+$\mathbf{ Z' = B\quad C \quad B}$  \\ 
+\end{quote}
+}
+\end{frame}
+
+\begin{frame}{LCS~结构分析}
+\huge{
+\begin{quote}
+$ X' = \underbrace{A\quad B \quad C \quad B} \quad \mathbf{D} $  \\ \pause
+\vspace*{.5cm}
+$ Y' = \underbrace{B\quad D \quad C \quad A \quad\ \mathbf{B}} $   \\ \pause
+\vspace*{1cm}
+$\mathbf{ Z' = B\quad C \quad  + \quad B}$  \\ 
+\end{quote}
+}
+\end{frame}
+
+\begin{frame}{LCS~结构分析}
+\huge{
+\begin{quote}
+$ X' = \underbrace{A\quad B \quad C \quad B \quad \mathbf{D}} $  \\ \pause
+\vspace*{.5cm}
+$ Y' = \underbrace{B\quad D \quad C \quad A }\quad \mathbf{B} $   \\ \pause
+\vspace*{1cm}
+$\mathbf{ Z'' = B\quad C}$  \\ 
+\end{quote}
+}
+\end{frame}
+
+\begin{frame}{第~$i$~前缀}
+\begin{definition}[第~$i$~前缀] 设序列 $X = \langle x_1, x_2,\ldots,x_m \rangle$, $X$~的第~$i$~前缀定义为序列~$X_i =\langle x_1, x_2,\ldots , x_i\rangle$,  其中~ $i = 0, 1,\ldots,m$. 
+\end{definition} \pause
+
+例:   $X =\langle A, B, C, B,
+  D, A, B\rangle$, $X_4 = \langle A, B, C, B\rangle$ , $X_0$
+~为空序列.  
+\end{frame}
+
+\begin{frame}{LCS 最优子结构}
+\begin{theorem}
+  $X =\langle x_1, x_2,\ldots, x_m\rangle$, $ Y = \langle y_1, y_2,\ldots, y_n\rangle$, \underline{$Z =\langle z_1, z_2,\ldots , z_k\rangle$是 $X$ 和 $Y$的 \textit{LCS}}, 则下列结论成立: 
+\end{theorem}
+  \begin{itemize}[<+-|alert@+>]
+\item[(1)] 如果~ $x_m = y_n$, 则~$z_k = x_m = y_n$, 
+  $Z_{k-1}$ 是 $X_{m-1}$ 和 $Y_{n-1}$~的 LCS. 
+\item[(2)] 如果 $x_m\neq y_n$, 且 $z_k\neq x_m$, 则 $Z$ 是 $X_{m-1}$ 和 $Y$ 的 LCS. 
+\item[(3)] 如果 $x_m\neq y_n$, 且 $z_k\neq y_n$, 则 $Z$ 是 $X$ 和 $Y_{n-1}$ 的 LCS. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{LCS 最优子结构定理证明}
+\begin{proof}
+(1) $X =\langle x_1, x_2,\ldots, x_m\rangle$, $ Y = \langle y_1,
+y_2,\ldots, y_n\rangle$, 则 $LCS(XY)=LCS(X_{m-1}Y_{n-1})+ (x_m=y_n)$. 
+
+设 $z_k\neq x_m$, 则通过把 $x_m = y_n$ 加在 $Z$ 中, 得到一个长度为 $k+1$ 的 $X$ 和 $Y$ 的公共序列, 与 $Z$ 是 $X$ 和 $Y$ 的 LCS 矛盾. 因此, 必有 $z_k = x_m =
+y_n$ 成立.  
+
+现在证明 $Z_{k-1}$ 是 $X_{m-1}$ 和 $Y_{n-1}$ 的 LCS. 显然 $Z_{k-1}$ 是 $X_{m-1}$ 与 $Y_{n-1}$ 的公共序列. 我们需要证明 $Z_{k-1}$ 是 LCS.  
+\end{proof}
+\end{frame}
+
+\begin{frame}{}
+  \begin{proof}
+设不然, 则存在 $X_{m-1}$ 和 $Y_{n-1}$ 的公共子序列 $W$, $W$ 的长大于 $k-1$, 增加 $x_m=y_n$ 到 $W$, 我们得到一个长大于 $k$ 的  $X$ 和 $Y$ 的公共序列, 与 $Z$ 是 LCS 矛盾, 于是, $Z_{k-1}$ 是 $X_{m-1}$ 和 $Y_{n-1}$ 的 LCS. 
+
+(2) $X =\langle x_1, x_2,\ldots, x_m\rangle$, $ Y = \langle y_1,
+y_2,\ldots, y_n\rangle$, $x_m\neq y_n$, $z_k\neq x_m$, 则 $LCS(XY)=LCS(X_{m-1}Y)$. 
+
+ 由于 $z_k\neq x_m$,  $Z$ 是 $X_{m-1}$ 和 $Y$ 的 公共子序列, 证明 $Z$ 是 $X_{m-1}$ 与 $Y$ 的 LCS. 设存在 $X_{m-1}$ 和 $Y$ 的 公共子序列 $W$, $W$ 的长大于 $k$, 则 $W$ 也是 $X$ 和 $Y$ 的 LCS, 与 $Z$ 是 LCS 矛盾, 因此, $Z$ 是 $X_{m-1}$ 和 $Y$ 的 LCS. 
+
+(3) 证明与 (2) 类似. 
+\end{proof}
+\end{frame}
+
+\begin{frame}{$X$ 和 $Y$ 的最优子结构}
+\begin{eqnarray*}
+  LCS(XY)  = \left\{\begin{array}{ll}
+ LCS(X_{m-1}Y_{n-1})+ x_m, \ \mathrm{if}\ x_m=y_n   \\ \pause
+LCS(X_{m-1}Y), \quad \mathrm{if}\ x_m\neq y_n, z_k\neq x_m   \\ \pause
+LCS(XY_{n-1}), \quad \mathrm{if}\ x_m\neq y_n, z_k\neq y_n  \pause
+\end{array}\right.
+\end{eqnarray*}
+
+结论: 两个序列的最长公共子序列包含了这两个序列的前缀的最长公共子序列.
+ 
+\end{frame}
+% \begin{frame}{3. 子问题的递归结构}
+
+% 由 LCS 问题的最优子结构性质可知, 要找出 $X =\langle x_1, x_2,\ldots, x_m\rangle$ 和 $ Y = \langle y_1,
+% y_2,\ldots, y_n\rangle$ 的 LCS, 可按以下方式递归地进行: 当 $x_m=y_n$ 时, 找出 $X_{m-1}$ 和 $Y_{n-1}$ 的 LCS, 然后在其尾部加上 $x_m$ 即可得到 $X$ 和 $Y$ 的 LCS. 当 $X_m\neq Y_n$ 时, 必须解两个子问题, 即找出 $X_{m-1}$ 和 $Y$ 的一个 LCS 及 $X$
+% 和 $Y_{n-1}$ 的一个 LCS. 这两个 LCS 中的较长者即为 $X$ 和 $Y$ 的 LCS.
+
+% \begin{frame}{LCS 子问题空间}
+% \begin{itemize*}
+% \item $X$, $Y$ 的 LCS 子问题空间由求 $X$　与 $Y$ 的前缀的 LCS 问题构成;
+% \item 由于 $X$ 的前缀个数为 $m$ 个,  $Y$ 的前缀个数为 $n$ 个, 求 $X$ 与 $Y$ 的前缀的 LCS 问题的个数为 $mn$ 个, 于是子问题空间的大小为 $\Theta(mn)$.
+% \end{itemize*}
+
+\begin{frame}{3. LCS 问题的子问题重叠性}
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{./pictures/LCS.png}%
+\end{figure}
+\end{frame}
+
+\begin{frame}{建立求解 LCS 长度的递归方程}
+\textbf{定理 1} 说明:  
+  \begin{itemize}[<+-|alert@+>]
+\item 如果 $x_m = y_n$,  $x_m$ 属于 $X$ 和 $Y$ 的 LCS,  须求解 $X_{m-1}$
+和 $Y_{n-1}$ 的 LCS.  
+\item 如果 $x_m\neq y_n$, 必须求解 $X_{m-1}$ 和 $Y$ 的 LCS 以及 $X$ 和
+$Y_{n-1}$ 的 LCS,  长者为 $X$ 和 $Y$ 的 LCS. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{LCS 代价递归方程}
+令 $c[i, j]=$ $X_i$ 和 $Y_j$ 的 LCS 的长度,  则 \pause
+\begin{eqnarray*}
+  \label{eq:lcs}
+  c[i,j]=\left\{\begin{array}{ll}
+0 &  i=0\ \textrm{or}\ j=0   \\ \pause
+c[i-1,j-1]+1 &  i,j >0\ ;\ x_i=y_j   \\ \pause
+\mathrm{max}\{c[i,j-1],c[i-1,j]\} &  i,j >0\
+;\ x_i \neq y_j  \pause
+\end{array}\right.
+\end{eqnarray*}
+\end{frame}
+
+\begin{frame}{4. LCS 长度的计算}
+%\item  基本思想: 计算 $c[i,j]$ 需要先计算 $c[i-1,j-1]$, $c[i, j-1]$, $c[i-1,j]$. 
+\begin{table}
+   \centering
+   \begin{tabular}{ll|l|l|ll}
+    % \hline
+&  & & & &  \\
+\hline
+%     $\ldots$ &  & 　& $\ldots$   \\
+%\hline
+     &  & $c[i-1, j-1]$ & $c[i-1, j]$  & &     \\
+\hline
+&    & $c[i, j-1]$ & $\mathbf{c[i,j]}$ &  &   \\
+\hline
+& &  & &  \\
+%$\ldots$ & & &  $\ldots$   \\
+%\hline
+   \end{tabular}
+ \end{table}
+\end{frame}
+
+\begin{frame}{计算过程}
+\begin{table}
+\Large{
+  \centering
+  \begin{tabular}{c|c|c|c|c}
+& & & & \\
+    %$c[0,0]$ &     $c[0,1]$ &     $c[0,2]$ &     $c[0,3]$ &     $c[0,4]$   \\ 
+\hline
+%    $c[1,0]$ &     $c[1,1]$ &     $c[1,2]$ &     $c[1,3]$ &     $c[1,4]$   \\ 
+& & & & \\
+\hline
+    %$c[2,0]$ &     $c[2,1]$ &     $c[2,2]$ &     $c[2,3]$ &     $c[2,4]$   \\ 
+& & & & \\
+\hline
+    \hspace*{1cm} &     \hspace*{1cm} &  \hspace*{1cm}    &    \hspace*{1cm} & $\mathbf{c[3,4]}$  \\ 
+
+%& & & & $\mathbf{c[3,4]}$ \\
+  \end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{计算过程}
+\begin{table}
+\Large{
+  \centering
+  \begin{tabular}{c|c|c|c|c}
+    %$c[0,0]$ &     $c[0,1]$ &     $c[0,2]$ &     $c[0,3]$ &     $c[0,4]$   \\ 
+& & & & $c[0,4]$ \\
+\hline
+%    $c[1,0]$ &     $c[1,1]$ &     $c[1,2]$ &     $c[1,3]$ &     $c[1,4]$   \\ 
+& & & & $c[1,4]$   \\
+\hline
+ & & &  $c[2,3]$ &     $c[2,4]$ \\ 
+\hline
+    $c[3,0]$ &     $c[3,1]$ &     $c[3,2]$ &     $c[3,3]$ &     $\mathbf{c[3,4]}$  \\ 
+
+%& & & & $\mathbf{c[3,4]}$ \\
+  \end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{计算过程}
+\begin{table}
+\Large{
+  \centering
+  \begin{tabular}{c|c|c|c|c}
+    $c[0,0]$ &     $c[0,1]$ &     $c[0,2]$ &     $c[0,3]$ &     $c[0,4]$  \\ 
+\hline
+    $c[1,0]$ &     $c[1,1]$ &     $c[1,2]$ &     $c[1,3]$ &     $c[1,4]$  \\ 
+\hline
+    $c[2,0]$ &     $c[2,1]$ &     $c[2,2]$ &     $c[2,3]$ &     $c[2,4]$  \\ 
+\hline
+    $c[3,0]$ &     $c[3,1]$ &  $c[3,2]$    &    $c[3,3]$ & $\mathbf{c[3,4]}$  \\ 
+
+%& & & & $\mathbf{c[3,4]}$ \\
+  \end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{5. LCS 动态规划算法}
+数据结构
+
+  \begin{itemize}[<+-|alert@+>]
+\item $c[0..m, 0..n]$: $c[i,j]$ 是 $X_i$ 与 $Y_j$ 的 LCS 的长度; 
+
+\item $b[1..m,1..n]$: $b[i,j]$ 是指针, 指向计算 $c[i,j]$ 时所选择的子问题的最优解所对应的 $c$ 表的表项.  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{\textsf{LCS-LENGTH}算法}
+
+\textsc{lcs-length}$(X,Y)$\\
+1 $m\gets  length[X]$\\
+2 $n\gets  length[Y]$\\
+3  \textbf{for} $i\gets  1$ \textbf{to} $m$\\
+4 \qquad \textbf{do} $c[i,0]\gets  0$\\
+5 \textbf{for} $j\gets  0$ \textbf{to} $n$\\
+6 \qquad \textbf{do} $c[0, j]\gets  0$\\
+\end{frame}
+
+\begin{frame}{}
+7  \textbf{for} $i\gets 1$ \textbf{to} $m$\\
+8\qquad \qquad \textbf{for} $j\gets  1$ \textbf{to} $n$\\
+9\ \qquad \qquad \qquad \textbf{if} $x_i = y_j$\\
+10 \qquad \qquad \qquad \qquad  $c[i, j]\gets
+c[i - 1, j -1] + 1$\\
+11 \qquad \qquad \qquad \qquad $b[i, j]\gets  ''\nwarrow ''$\\
+12 \qquad \qquad \qquad \textbf{else if} $c[i - 1, j]\geq  c[i, j - 1]$\\
+13\qquad \qquad \qquad \qquad  $c[i, j]\gets  c[i - 1, j]$\\
+14  \qquad \qquad \qquad \qquad $b[i, j]\gets  ''\uparrow ''$\\
+15  \qquad \qquad \qquad \textbf{else} \\
+16 \qquad \qquad \qquad\qquad $c[i, j]\gets c[i, j -1]$\\
+17  \qquad \qquad \qquad \qquad $b[i, j]\gets  ''\leftarrow ''$\\
+18  \textbf{return} $c$ and $b$
+\end{frame}
+
+\begin{frame}{5. 构造最优解}
+1. 基本思想
+  \begin{itemize}[<+-|alert@+>]
+\item 从 $b[m,n]$ 开始按指针搜索, 若 $b[i,j] =$ `` $ \nwarrow$'', 则 $x_i=y_j$ 是 LCS 的一个元素.
+\item 如此找到的 ``LCS'' 是 $X$ 和 $Y$ 的 LCS 的逆序列.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{6. 最优解构造算法}
+\textsc{print-lcs}$(b,X,i,j)$\\
+1\qquad \textbf{if} $i = 0$ or $j = 0$\\
+2\qquad \qquad      \textbf{then return}\\
+3\qquad  \textbf{if} $b[i, j] = ''\nwarrow''$\\
+4\qquad \qquad \textbf{then} \textsc{print-lcs}$(b,X,i - 1, j - 1)$\\
+5\qquad \qquad \qquad  print $x_i$\\
+6\qquad \textbf{else if} $b[i,j] = ''\uparrow''$\\
+7\qquad \qquad \textbf{then} \textsc{print-lcs}$(b,X,i - 1,j)$\\
+8\qquad  \textbf{else} \textsc{print-lcs}$(b,X,i, j - 1)$
+\end{frame}
+
+\begin{frame}{7. 算法时间复杂性分析}
+  \begin{itemize}[<+-|alert@+>]
+\item 算法 \textbf{LCS-LENGTH} 包含 $i$ 和 $j$ 的两层循环, 而 $i\leq m$, $j\leq n$, 所以算法时间复杂性为 $O(mn)$. 
+\item 算法 \textbf{PRINT-LCS} 每一次递归调用, $i$ 或 $j$ 递减,  因此, 算法时间复杂性为  $O(m + n)$. 
+\item 因此, 整个算法时间复杂性为 $O(mn)$. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{LCS 算法例子}
+  \begin{itemize}[<+-|alert@+>]
+\item 
+给定序列 $X=\langle A, B, C, B, D, A, B \rangle$, $Y=\langle B, D, C, A, B, A \rangle$, 计算 $X$ 和 $Y$ 的 LCS.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{计算过程}
+\begin{table}
+  \centering
+\begin{tabular}{cc|c|c|c|c|c|c|c|}
+& $j$ & 0 & 1 & 2 & 3 & 4 & 5 & 6\\ 
+$i$  &    & $y_j$ & ${B}$ & D & ${C}$ & A & ${B}$ & ${A}$ \\
+\hline
+ 0 & $x_i$ & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \hline
+1 & A     & 0 $\bigstar$ & $0^\uparrow$ & $0^\uparrow$ & $0^\uparrow$ & $1^\nwarrow$ & $1^\gets$ & $1^\nwarrow$   \\ \hline
+2 & ${B}$ & 0 & $1^\nwarrow\bigstar$ & $1^\gets\bigstar$ & $1^\gets$ & $1^\uparrow$ & $2^\nwarrow$ & $2^\gets$  \\ \hline
+3 & ${C}$ & 0 & $1^\uparrow$ & $1^\uparrow$ & $2^\nwarrow\bigstar$ & $2^\gets\bigstar$ & $2^\uparrow$ &  $2^\uparrow$ \\\hline
+4 & ${B}$ & 0 & $1^\nwarrow$ & $1^\uparrow$ & $2^\uparrow$ & $2^\uparrow$ & $3^\nwarrow\bigstar$ & $3^\gets$ \\\hline
+5 & D & 0 & $1^\uparrow$ & $2^\nwarrow$ & $2^\uparrow$ & $2^\uparrow$ & $3^\uparrow\bigstar$ & $3^\uparrow$  \\\hline
+6 & ${A}$ & 0 & $1^\uparrow$ & $2^\uparrow$ & $2^\uparrow$ & $3^\nwarrow$ & $3^\uparrow$ &  $4^\nwarrow\bigstar$ \\\hline
+7 & B & 0 & $1^\nwarrow$ & $2^\uparrow$ & $2^\uparrow$ & $3^\uparrow$ & $4^\nwarrow$ & $4^\uparrow\bigstar$ \\
+\hline
+  \end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{3.10 0/1背包问题}
+\begin{definition}[背包问题(Knapsack)]
+ 给定 $n$ 个重量为 $w_1, w_2, \ldots, w_n$, 价值为 $v_1,v_2, \ldots,
+ v_n$ 的物品和容量为 $c$ 的背包, 问应如何选择装入背包的物品, 使得装入
+ 背包中物品的{总价值最大}.
+\end{definition} \pause
+\begin{definition}[0-1 背包问题]
+  在选择装入背包的物品时, 对每种物品 $i$ 只有两种选择: 装入背包或不装入背包. 不能将物品 $i$ 装入背包多次, 也不能只装入部分的物品 $i$.   
+\end{definition}
+\end{frame}
+
+\begin{frame}{背包问题实例}
+\begin{figure}[centering]
+  \centering
+  \includegraphics[width=.6\textwidth]{./pictures/knapsack.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{穷举法求解}
+\begin{table}[centering]
+  \centering
+$w=[7,3,4,5]$, $v=[42,12,40,25]$, $c=10$.
+\footnotesize{
+  \begin{tabular}{l|l|l}
+    \hline
+\qquad 子 集\ \qquad\ & \qquad 总 重 量\ \qquad\ & \qquad 总 价 值\ \qquad\ \\
+\hline
+$\Phi$ & 0 & 0 \\
+\hline
+\{1\} & 7 & 42 \\
+\hline
+\{2\} & 3 & 12 \\
+\hline
+\{3\} & 4 & 40 \\
+\hline
+\{4\} & 5 & 25 \\
+\hline
+\{1,2\} & 10 & 36 \\
+\hline
+\{1,3\} & 11 & 不可行 \\
+\hline
+\{1,4\} & 12 & 不可行 \\
+\hline
+\{2,3\} & 7 & 52 \\
+\hline
+\{2,4\} & 8 & 37 \\
+\hline
+\{\textbf{3,4}\} & \textbf{9} & \textbf{65} \\
+\hline
+\{1,2,3\} & 14 & 不可行 \\
+\hline
+\{$\ldots$\} & $>10$ & 不可行 \\
+\hline
+  \end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{0/1背包问题解空间}
+  \begin{itemize}[<+-|alert@+>]
+\item 穷举查找需要考虑 $n$ 个物品集合的所有子集, 计算每个子集的总重量,然后从它们中间找到价值最大的子集.  
+\item 一个 $n$ 元素集合的子集数量是 $2^n$, 穷举查找导致一个$\Omega(2^n)$ 的算法. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{线性规划问题}
+\begin{itemize}[<+-|alert@+>]
+\item \textbf{线性规划问题:}\emph{多变量线性函数}的最优化问题, 这些变量所要满足的一些约束是线性等式或线性不等式. 
+\item \textbf{整数规划问题:}线性规划问题中的变量必须是整数.  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{线性规划问题示例}
+例: 根据约束条件 
+\begin{eqnarray*}
+  \left\{\begin{array}{ll}
+ a_{i_1}x_1+\cdots +a_{i_n}x_n\leq b_i, \qquad i=1,\ldots, m, \\
+x_i, \ldots, x_n \geq 0 
+\end{array}\right. 
+\end{eqnarray*}
+求 
+\underline{$c_1x_1+\cdots +c_nx_n$} 最大值或最小值.  
+\end{frame}
+
+\begin{frame}{2. 0/1背包问题形式化定义}
+  \begin{definition}[0/1背包问题形式化]
+     给定 $c>0$, $w_i, v_i > 0$, $1\leq i\leq n$, 要求找出一个 \underline{$n$ 元 0-1 向量 $(x_1, x_2,\ldots ,x_n)$}, $x_i\in \{0,1\}$, $1\leq i\leq n$, 使得 $\sum_{i=1}^nw_ix_i \leq c$, 而且, $\sum_{i=1}^nv_ix_i$ 达到最大.  
+   \end{definition} \pause
+   \begin{eqnarray*}
+\hspace*{2cm}     \mathrm{max}\sum_{i=1}^nv_ix_i \\
+\hspace*{3cm}  s.t. \left\{\begin{array}{ll}
+\sum_{i=1}^nw_ix_i \leq c,   \\
+\underline{x_i \in \{0, 1\}}, 1\leq i \leq n.
+\end{array}\right.  
+\end{eqnarray*}
+\end{frame}
+
+\begin{frame}{例： 0/1背包问题实例}
+ 在 0/1 背包问题中需要决定 $x_1, \ldots, x_n$的值, 假设按 $i =1,\ldots,n$ 的次序来确定 $x_i$ 的值: 
+\begin{itemize}[<+-|alert@+>]
+\item[(1)] 若置 $x_1 =0$, 问题变为相对于其余 $n-1$ 物品, 背包容量为 $c$ 的背包问题; 
+\item[(2)] 若置 $x_1 =1$, 问题变为关于背包容量为 $c-w_1$ 的问题.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{0/1背包问题决策}
+  \begin{itemize}[<+-|alert@+>]
+\item 现设$r\in \{c,c-w_1\}$ 为剩余的背包容量, 在第一次决策之后, 剩下的问题便是考虑背包容量为 $r$ 时的决策.
+\item 不管 $x_1$ 是 0 或是 1, $[x_2,\ldots, x_n]$ 必须是第一次决策之后
+  的一个最优方案, 如果不是, 则会有一个更好的方案 $[y_2,\ldots, y_n]$,
+  因而 $[x_1,y_2,\ldots,y_n]$ 是一个更好的方案.
+ \end{itemize}
+\end{frame}
+
+\begin{frame}{0/1背包问题实例}
+  假设 $n=3$, $w=[100,14,10]$, $v=[20,18,15]$, $c=116$.
+    \begin{itemize}[<+-|alert@+>]
+    \item[(1)] 若 $x_1 =1$, 决策之后可用的背包容量为 $r=116-100=16$. 
+      \begin{itemize}[<+-|alert@+>]
+      \item[a.] $(x_2,x_3)=(0,1)$, 所得值为 $15$;
+      \item[b.] $(x_2,x_3)=(1, 0)$ 所得值为 $18$.
+      \end{itemize}
+\item 因此$(x_2,x_3)=(0,1)$ 并非最优策略. 即 $\mathbf{x}=(1,0,1)$ 可改进为 $\mathbf{x}=(1,1,0)$. 
+\item[(2)] 若设 $x_1 =0$, 则对于剩下的两种物品而言, 容量限制条件为
+  116.
+\end{itemize}\pause
+ 总之, 如果子问题的结果 $(x_2,x_3)$ 不是剩余情况下的一个最优解, 则 $(x_1, x_2, x_3)$ 也不会是总体的最优解. 
+\end{frame}
+
+\begin{frame}{0/1 背包问题递归关系}
+设 $m(i,j)$ 表示剩余容量为 $j$, 剩余物品为 $i,i+1,\ldots, n$ 时的最优解的价值:  \pause
+\begin{eqnarray}
+  m(n,j)=\left\{\begin{array}{ll}
+0 \qquad 0\leq j < w_n  \\ \pause
+v_n \qquad j \geq w_n   \pause
+\end{array}\right.
+\end{eqnarray} 
+和
+\begin{eqnarray}
+\small{
+  m(i,j)=\left\{\begin{array}{ll} \pause
+m(i+1, j), \qquad 0\leq j < w_i \\  \pause
+\mathrm{max}\{m(i+1,j), m(i+1, j-w_i)+v_i\},\  j\geq w_i    
+\end{array}\right.
+}
+\end{eqnarray}
+\end{frame}
+
+\begin{frame}{例: 递归公式求解}
+\begin{exampleblock}{}
+ 设$n=5$, $v=[6,3,5,4,6]$, $w=[2,2,6,5,4]$ 且 $c=10$, \\ 求 $m(1,10)$. 
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{}
+\begin{figure}
+  \centering
+$v=[6,3,5,4,6]$, $w=[2,2,6,5,4]$, $c=10$,计算$m(1,10)$.
+  \includegraphics[width=.85\textwidth]{./pictures/knapsack1.png}%
+\end{figure}
+\end{frame}
+
+\begin{frame}{子问题重复计算}
+    \begin{itemize}[<+-|alert@+>]
+\item 每个节点用 $j$ 值来标记. 对于第 $k$ 层的节点有 $i=k$, 因此根节点表示 $m(1,10)$, 而它有左孩子和右孩子,分别对应 $m(2,10)$ 和 $m(2,8)$. 总共执行了 $28$ 次递归调用. 
+\item 其中含有重复前面工作的节点, 如 $m(3,8)$ 计算过两次, 相同情况的还有 $m(4,8)$、 $m(4,6)$、 $m(4,2)$、 $m(5,8)$、$m(5,6)$、$m(5,3)$、$m(5,2)$ 和 $m(5,1)$. 如果保留以前的计算结果, 则可将节点数减至 19. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{3. 动态规划思想}
+\begin{table}[c]
+  \centering
+  \begin{tabular}{rc|c|c|c|c}
+&  & 0  & $j-w_i$ & $j$ & $c$ \\
+\hline
+& 1   &  &  &  & $m[1,c]$  \\
+& & & & & \\
+ $w_i, v_i$ & $i$ & 0  & $m[i,j]$ &    \\
+ & $i+1$ & 0  & $m[i+1,j-w_i]$  & $m[i+1,j]$ &  \\
+& & & & & \\
+& $n$ & 0  &  & & $v_n$  \\
+  \end{tabular}
+%  \caption{Knapsack dynamic progamming}
+  \label{tab:knapsack}
+\end{table}
+\end{frame}
+
+\begin{frame}{Fun Time}
+$\mathbf{v}=[20,18,15]$, $\mathbf{w}=[100,14,10]$, $c=116$.
+\begin{eqnarray*}
+\small{
+ m(i,j)=\left\{\begin{array}{ll}
+m(i+1, j), \qquad 0\leq j < w_i\\ 
+\mathrm{max}\{m(i+1,j), m(i+1, j-w_i)+v_i\},\  j\geq w_i  
+\end{array}\right.
+}
+\end{eqnarray*}
+
+\begin{table}[c]
+  \centering
+  \begin{tabular}{rc|ccccccc}
+& $i,j$ & 2  & 10 & 14 & 16 & 24 & 100 & 116 \\
+\cline{2-9}
+& 1   &  &  &  &  &  &  &  \\
+& 2    &  &  &  &  &  &  &  \\
+& 3    &  &  &  &  &  &  &  \\
+  \end{tabular}
+%  \caption{Knapsack dynamic progamming}
+  \label{tab:knapsack}
+\end{table}
+\end{frame}
+
+\begin{frame}{动态规划算法求解背包问题实例}
+\begin{table}[c]
+  \centering
+  \begin{tabular}{rc|ccccccc}
+& $i,j$ & 2  & 10 & 14 & 16 & 24 & 100 & 116 \\
+\cline{2-9}
+$w_1=100, v_1=20$ & 1  & 0 & 15 & 18 & 18 & 33 & 33 & 38 \\
+
+$w_2=14, v_2=18$ & 2  & 0 & 15 & 18 & 18  & 33 & 33 & 33 \\
+
+$w_3=10, v_3=15$ & 3  & 0 & 15 & 15 & 15 & 15 & 15 & 15 \\
+
+  \end{tabular}
+%  \caption{Knapsack dynamic progamming}
+  \label{tab:knapsack}
+\end{table}
+\end{frame}
+
+\begin{frame}{例3 0/1 背包问题决策}
+$\mathbf{v}=[20,18,15]$, $\mathbf{w}=[100,14,10]$, $c=116$. \pause
+\begin{eqnarray*}
+  m(3,j)= \left\{ \pause
+  \begin{array}{ll}
+    0\ \qquad  \mathrm{if}\ 0\leq j<10,    \\ \pause
+15 \qquad \mathrm{if}\  j\geq 10.  \pause
+\end{array}\right.  
+\end{eqnarray*} \pause
+利用递归式 (2), 可得  
+\begin{eqnarray*} 
+  m(2, j)= \left\{ \pause
+    \begin{array}{ll}
+      0 \qquad\ \mathrm{if}\ 0\leq j<10;   \\ \pause
+      15 \qquad \mathrm{if}\ 10\leq j<14;   \\ \pause
+      18 \qquad \mathrm{if}\ 14\leq j<24;  \\ \pause
+      33 \qquad \mathrm{if}\ j\geq 24.    \pause
+    \end{array}\right.  
+  \end{eqnarray*} \pause
+
+  因此最优解的价值 
+  \begin{eqnarray*}
+    m(1,116)& = & \mathrm{max}\{m(2,116), m(2,116-w_1)+v_1\}   \\ \pause
+            & = & \mathrm{max}\{m(2,116), m(2,16)+20\}   \\ \pause
+            & = & \mathrm{max}\{33,38\}   \\ \pause
+            & = & 38   
+\end{eqnarray*}
+\end{frame}
+
+\begin{frame}{4. 计算 0/1 背包问题最优解}
+现在计算 $x_i$ 值, 步骤如下:
+    \begin{itemize}[<+-|alert@+>]
+\item 若 $m(1,c)=m(2,c)$, 则 $x_1=0$, 否则 $x_1=1$;  
+\item 接下来从剩余容量 $c-w_1$ 中寻求最优解, 用 $m(2,c-w_1)$ 表示最优解; 
+\item 依此类推, 可得到所有的 $x_i(i=1\ldots n)$ 值. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{最优值计算实例}
+\begin{table}[c]
+  \centering
+  \begin{tabular}{rc|ccccccc}
+& $i,j$ & 2  & 10 & 14 & 16 & 24 & 100 & 116 \\
+\cline{2-9}
+$w_1=100, v_1=20$ & 1  & 0 & 15 & 18 & 18 & 33 & 33 & 38 \\
+
+$w_2=14, v_2=18$ & 2  & 0 & 15 & 18 & 18  & 33 & 33 & 33 \\
+
+$w_3=10, v_3=15$ & 3  & 0 & 15 & 15 & 15 & 15 & 15 & 15 \\
+  \end{tabular}
+\end{table}
+    \begin{itemize}[<+-|alert@+>]
+\item[(1)] $m(2,116)=33\neq m(1,116)$, 所以 $x_1=1$; 
+\item[(2)] 由 $m(2,16)=18$,  $m(3,16)=15$, 因此 $x_2 =1$; 
+\item[(3)] $m(3,2)=0$, 即得 $x_3=0$. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{计算复杂性分析}
+\begin{eqnarray*}
+\small{
+  m(i,j)=\left\{\begin{array}{ll}
+m(i+1, j), \qquad 0\leq j < w_i \\ 
+\mathrm{max}\{m(i+1,j), m(i+1, j-w_i)+v_i\},\  j\geq w_i   
+\end{array}\right.
+}
+\end{eqnarray*}
+ 算法需要 $O(nc)$ 计算时间. 
+\end{frame}
+
+\begin{frame}{补充:可重复物品背包问题}
+    \begin{itemize}[<+-|alert@+>]
+\item 背包容量 $C$,
+\item 物品重量为 $w_1, \ldots, w_n$, 价值 $v_1, \ldots, v_n$,
+\item 每一种物品有无限多个, 可重复装入背包多次,
+\end{itemize} \pause
+求如何装包获得价值最大.
+\end{frame}
+
+\begin{frame}{可重复物品背包问题实例}
+$C = 10$.  
+\begin{table}
+  \centering
+  \begin{tabular}{ccccc}
+Item & & Weight & & Value \\
+1 & & 6 & & \$30 \\
+2 & & 3 &  & \$14 \\
+3 & & 4 & & \$16 \\
+4 & &  2 &  & \$9    
+  \end{tabular}
+\end{table} \pause
+total: \$48  
+\end{frame}
+
+\begin{frame}{可重复物品背包问题子问题分析}
+      \begin{itemize}[<+-|alert@+>]
+\item[(1)] 考虑更小的背包容量, $c \leq C$   
+\item[(2)] 考虑更少的物品, $1,2,\ldots, j$, $\mathbf{for}\ j \leq n$   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{更小的背包容量}
+\begin{center}
+  $K(c) = $ 容量为 $c$ 的背包所能获得的最大价值
+\end{center}
+    \begin{itemize}[<+-|alert@+>]
+\item 如果 $K(c)$ 的最优解包含物品 $i$, 则从背包中去掉该物品能够得到问题 $K(c-w_i)$ 的最优解  
+\item 即对于物品 $i$ 而言, $K(c)=K(c-w_i)+v_i$.  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{可重复物品背包问题代价公式}
+\begin{eqnarray*}
+      K(c)=\qquad \{K(c-w_i)+v_i\} 
+\end{eqnarray*}
+\end{frame}
+
+\begin{frame}{可重复物品背包问题代价公式}
+\begin{eqnarray*}
+      K(c)=\max\limits_{i:w_i\leq c}\{K(c-w_i)+v_i\} 
+\end{eqnarray*}
+\end{frame}
+
+\begin{frame}{动态规划思想}
+\begin{eqnarray*}
+      K(c)=\max\limits_{i:w_i\leq c}\{K(c-w_i)+v_i\},
+\end{eqnarray*}
+\begin{table}[c]
+  \centering
+  \begin{tabular}{cccccccc}
+%\hline
+  0 & $\cdots$ & $w_i$ & $\cdots$ & $c-w_i$  & $\cdots$ & $c$ \\
+\hline
+\vline\  0 \vline & $\cdots$ \vline\ & $v_i$ \vline\ & $\cdots$ \vline\  & $K(c-w_i)$
+  \vline\ & $\cdots $ \vline\ &   $K(c)$ \vline & $\cdots$ \vline   \\
+\hline
+  \end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{可重复物品背包问题算法}
+\textsc{knapback-with-repetion}$(C, v)$ \\
+1 \quad $K(0) = 0$ \\
+2 \quad \textbf{for} $c = 1$ to $C$ : \\
+3 \quad \qquad $K(c) = max\{K(c - w_i) + v_i : w_i \leq c\}$ \\
+4 \quad \textbf{return} $K(C)$
+
+\vspace*{2cm}
+算法时间复杂性为 $O(nC)$.  
+\end{frame}
+
+\begin{frame}{Fun Time}
+$\mathbf{w}=[2,3,4,6]$, $\mathbf{v}=[9,14,16,30]$, $C=10$.
+\begin{eqnarray*}
+      K(c)=\max\limits_{i:w_i\leq c}\{K(c-w_i)+v_i\}
+\end{eqnarray*}
+\begin{table}[c]
+  \centering
+  \begin{tabular}{c|c|c|c|c|c|c|c|c|c|c}
+\hline
+ $c$ &  \textit{0} & \textit{1} & \textit{2} & \textit{3} & \textit{4}  & \textit{5} & \textit{6} & \textit{7} & \textit{8} & \textit{10} \\
+\hline
+$K(c)$ &  0 & $K_1$ & $K_2$ & $K_3$ & $K_4$  & $K_5$ & $K_6$ & $K_7$ & $K_8$ & $K_{10}$ \\
+\hline
+  \end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{3.11 最优二叉搜索树}
+\begin{itemize}
+\item  二叉搜索树是最重要的数据结构之一 
+\item 最主要应用是实现字典, 这是一种具有查找、插入和删除操作的元素集合 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{二叉搜索树}
+二叉搜索树(Binary Search Tree), 或者是一棵空树,  或者是具有下列性质的二叉树:
+\begin{itemize}
+\item 若它的左子树不空, 则左子树上所有结点的值均小于它的根结点的值 
+\item 若它的右子树不空, 则右子树上所有结点的值均大于它的根结点的值 
+\item 它的左、右子树也分别为二叉搜索树 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{最优二叉搜索树问题}
+\begin{itemize}
+\item 给定 $n$ 个不同的有序键值序列 $ K =<a_1, a_2,\ldots, a_n>$, $(a_1 < a_2 <
+  \ldots, < a_n)$,  
+\item 对于任意键值 $a_i$,  $a_i$ 的查找概率为 $p_i$,　 
+\item 给定键值查找概率集合，构造一棵关于 $K$ 的二叉搜索树,它在查找过程中的\underline{平均键值比较次数最低} 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{最优二叉搜索树的例子}
+分别以概率 0.1, 0.2, 0.4, 0.3 来查找 4 个键 $A$, $B$, $C$, $D$. 
+%包含这些键的二叉搜索树有 $?$ 种不同的可能. 
+%\begin{frame}{图 包含 $A$, $B$, $C$, $D$ 的可能的二叉树}
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{./pictures/bst.png}  
+\end{figure}
+\end{frame}
+
+\begin{frame}{}
+在成功查找的情况下, 第一棵树的平均键值比较次数为 
+\begin{displaymath}
+  0.1\times 1+ 0.2\times 2+0.4\times 3+0.3\times 4=2.9, 
+\end{displaymath}
+第二棵树的平均键值比较次数为 
+\begin{displaymath}
+  0.1\times 2+ 0.2\times 1+0.4\times 2+0.3\times 3=2.1. 
+\end{displaymath}
+\end{frame}
+
+\begin{frame}{Fun Time}
+给定 4 个键值 $A$, $B$, $C$, $D$, 可构造多少棵二叉搜索树？
+\end{frame}
+
+\begin{frame}{最优二叉搜索树解空间}
+包含 $n$ 个键的二叉搜索树的总数量等于第 $n$ 个 Catalan 数,
+\begin{displaymath}
+  C(n)={2n \choose n}\frac{1}{n+1} = \Omega(4^n/n^{3/2}).
+\end{displaymath}
+\end{frame}
+
+\begin{frame}{递归公式推导}
+\begin{itemize}
+\item 设 $a_1, a_2, \ldots, a_n$ 是从小到大排列的互不相等的键, $p_1, \ldots, p_n$ 是它们的查找概率
+\item $T_i^j$ 是由键 $a_i, a_{i+1},$ $\ldots, a_j$ 构成的二叉树,  
+\item $c[i,j]$ 是在这棵树中成功查找的最小的平均比较次数,  
+\item 其中 $1\leq i \leq j \leq   n$ 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{最优子结构性质}
+ 从键 $a_i, a_{i+1}, \ldots, a_j$ 中选择一个根 $a_k$ 构造一棵二叉树, 它的根包含
+ 键 $a_k$, 
+
+(1) 它的左子树 $T_i^{k-1}$ 中的键 $a_i, a_{i+1}, \ldots, a_{k-1}$ 是最优排列,
+
+(2) 它的右子树 $T_{k+1}^j$ 中的键 $a_{k+1}, \ldots, a_j$ 也是最优排列.
+\end{frame}
+
+\begin{frame}{ 以 $a_k$ 为根的二叉搜索树}
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\textwidth]{./pictures/bst.png}%
+\end{figure}
+\end{frame}
+
+\begin{frame}{代价递归公式定义}
+从 1 开始对树的层数进行计数, $L_{a_i}$ 表示 $a_i$ 的层数 
+\begin{eqnarray*}
+  c[i,j] & = &\qquad\quad\  \{p_k\times 1+\underline{\sum_{s=i}^{k-1}p_s\times (L^{i,k-1}_{a_s}+1)}+\\
+& & \uuline{\sum_{s=k+1}^jp_s\times(L^{k+1,j}_{a_s}+1)}\}   \\
+\end{eqnarray*}
+\end{frame}
+
+\begin{frame}{代价递归公式定义}
+从 1 开始对树的层数进行计数, $L_{a_i}$ 表示 $a_i$ 的层数 
+\begin{eqnarray*}
+  c[i,j] & = & \mathrm{min}_{i\leq k\leq j}\{p_k\times 1+\underline{\sum_{s=i}^{k-1}p_s\times (L^{i,k-1}_{a_s}+1)}+\\
+& & \uuline{\sum_{s=k+1}^jp_s\times(L^{k+1,j}_{a_s}+1)}\}   \\
+\end{eqnarray*}
+\end{frame}
+
+\begin{frame}{}
+从 1 开始对树的层数进行计数, $L_{a_i}$ 表示 $a_i$ 的层数 
+\begin{eqnarray*}
+  c[i,j] & = & \mathrm{min}_{i\leq k\leq j}\{p_k\times 1+\underline{\sum_{s=i}^{k-1}p_s\times (L^{i,k-1}_{a_s}+1)}+\\
+& & \uuline{\sum_{s=k+1}^jp_s\times(L^{k+1,j}_{a_s}+1)}\}   \\
+& = & \mathrm{min}_{i\leq k\leq j}\{p_k+\underline{\sum_{s=i}^{k-1}p_s\times L^{i,k-1}_{a_s}+\sum_{s=i}^{k-1}p_s}+\\
+& & \uuline{\sum_{s=k+1}^jp_s\times L^{k+1,j}_{a_s}+\sum_{s=k+1}^jp_s}\}   \\
+& = & \mathrm{min}_{i\leq k\leq j}\{\sum_{s=i}^{k-1}p_s\times L^{i,k-1}_{a_s}+
+ \sum_{s=k+1}^jp_s\times L^{k+1,j}_{a_s}   \\
+& & + \sum_{s=i}^jp_s \}   \\
+& = & \mathrm{min}_{i\leq k\leq j}\{c[i,k-1]+c[k+1,j]\}+\sum_{s=i}^jp_s  
+\end{eqnarray*}
+得出下面的递推式 
+\begin{eqnarray*}
+  c[i,j] =  \mathrm{min}_{i\leq k\leq j}\{c[i,k-1]+c[k+1,j]\}+\sum_{s=i}^jp_s 
+\end{eqnarray*}
+其中, $1\leq i\leq j\leq n$. 
+\end{frame}
+
+\begin{frame}{$c[i,j]$ 特殊情况}
+
+\begin{eqnarray*}
+  c[i,j] =  \mathrm{min}_{i\leq k\leq j}\{c[i,k-1]+c[k+1,j]\}+\sum_{s=i}^jp_s
+\end{eqnarray*}
+
+\begin{itemize}
+\item  当 $1\leq i\leq n+1$ 时, $c[i,i-1]=0$, 为空树的比较次数.  
+\item $ c[i,i]=p_i, (1\leq i\leq n)$, 它是一棵包含 $a_i$ 的单节点二叉树.  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{构造最优解}
+\begin{itemize}
+\item 采用 数组 $r[i,j]$ 记录 $c[i,j]$ 达到最小时的 $k$ 值, 也就是最优子树 $T_i^j$ 的根结点元素下标, 根据数组 $r[1,n]$ 可以构造整个最优二叉树:   
+\item 当 $r[1,n]=k$ 时, $x_k$ 为所求最优二叉树根节点元素, 其左子树为 $T_1^{k-1}$, $r[1, k-1]$ 为其左子树根节点元素下标; 
+\item 右子树为 $T_{k+1}^n$, $r[k+1, n]$ 为其右子树根节点元素下标, 依此类推, 可完成最优解的构造. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{算法示例}
+\begin{itemize}
+\item 查找键值: $A, B, C, D$,
+\item 查找概率: $0.1, 0.2, 0.4, 0.3$.
+\item 生成表格如下:
+\end{itemize}
+\end{frame}
+
+\begin{frame}{计算 $c[i,j]$ 表}
+\begin{table}
+%\caption {主表}
+  \centering
+\Large{
+  \begin{tabular}{|l|ccccc|}
+\hline
+     & 0 & 1 & 2 & 3 & 4 \\
+\hline
+1 & 0 & 0.1 & 0.4 & 1.1 & 1.7  \\
+2  & & 0 & 0.2 & 0.8 & 1.4 \\
+3 & & & 0 & 0.4 & 1.0  \\
+4 & & & & 0 & 0.3  \\
+5 &  &  & & & 0  \\
+\hline
+  \end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{计算 $r[i,j]$ 表}
+\begin{table}
+%\caption {主表}
+  \centering
+\Large{
+  \begin{tabular}{|l|ccccc|}
+\hline
+    &   0 & 1 & 2 & 3 & 4\\
+\hline
+1  & & 1 & 2 & 3  & 3  \\
+2  &  &  & 2 & 3 & 3  \\
+3 &  & &  & 3 & 3   \\
+4 &  & & &  & 4  \\
+\hline
+  \end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{例子中的最优二叉搜索树}
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\textwidth]{./pictures/bst1.png}%
+\end{figure}
+\end{frame}
+
+\begin{frame}{OptimalBST 算法}
+\textsc{OptimalBST}$(p[1..n])$\\
+1. \textbf{for} $i\gets 1$ \textbf{to} $n$ \\
+2. \qquad $c[i,i-1]\gets 0$\\
+3. \qquad $c[i,i]\gets p[i]$\\
+4. \qquad $r[i,i]\gets i$\\
+5. $c[n+1,n]\gets 0$\\
+6. \textbf{for} $l\gets 1$ \textbf{to} $n$ \\
+7. \qquad \textbf{for} $i\gets 1$ \textbf{to} $n-l+1$ \\
+8. \qquad  \qquad $j\gets i+l-1$\\
+9. \qquad  \qquad $minval\gets \infty$\\
+10. \qquad  \textbf{for} $k\gets i$ \textbf{to} $j$ \\
+11. \qquad  \qquad \textbf{if} $c[i,k-1]+c[k+1,j] < minval$\\
+12. \qquad  \qquad \qquad $minval\gets c[i,k-1]+c[k+1,j]$\\
+13. \qquad  \qquad \qquad $kmin\gets k$\\
+14. \qquad   \qquad $r[i,j]\gets kmin$\\
+15. \qquad   \qquad $psum\gets p[i]$\\
+16. \qquad   \qquad \textbf{for} $s\gets i+1$ \textbf{to} $j$ \\
+17. \qquad   \qquad \qquad $psum\gets psum+p[s]$\\
+18. \qquad   \qquad $c[i,j]\gets minval+psum$\\
+19. \textbf{return} $c[1,n]$, $r$
+\end{frame}
+
+\begin{frame}{算法时间复杂分析}
+\begin{itemize}
+\item 算法的时间复杂性
+  \begin{eqnarray*}
+   T(n) & = & \sum_{l=1}^{n}\sum_{i=1}^{n-l+1}\sum_{k=i}^{j}1    \\
+          & = & O(n^3). 
+  \end{eqnarray*}
+      \item 空间复杂性为 $O(n^2)$. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{本章小结}
+\begin{itemize}
+\item 动态规划方法是一种对具有重叠子问题的问题进行求解的技术. 求解问题要求满足最优子结构性质.
+\item 这些子问题出现在求解给定问题的递归关系中, 递归关系中包含了相同类型的更小子问题的解.
+\item 对每个较小的子问题只解一次并把结果记录在表中, 这样可以从表中得出原始问题的解.
+\end{itemize}
+\end{frame}
+
+\end{document}
+
+%%%
+Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
