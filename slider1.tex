@@ -1,0 +1,1171 @@
+% Revised on Apr 7, 2025
+
+\documentclass[fontset=fandol,UTF8,12pt,aspectratio=169,fleqn]{beamer}
+% \usepackage[english]{babel}
+%\PassOptionsToPackage{quiet}{fontspec}
+\usepackage[UTF8]{ctex}
+%\usepackage{fontspec}
+
+%\usepackage[useregional]{datetime2}
+%\usepackage{mathtools,amsthm,amssymb,bm,amsmath,mathrsfs}
+\usepackage{amssymb,amsfonts,amsmath,amsthm,mathrsfs,mathptmx} %数学常用宏包
+\usepackage{amsfonts}
+ \usepackage{graphicx}
+% \usepackage[backend=biber,style=authoryear]{biblatex}
+% \addbibresource{biblio.bib}
+
+\newcommand{\projdim}[1]{\mathbb{P}^#1}
+\newcommand{\esperanza}[1]{\mathbb{E}(#1)}
+\newcommand{\proba}[1]{\mathbb{P}(#1)}
+\newcommand{\gavilla}[2]{\mathcal{O}_{#1}(#2)}
+
+ \newcommand{\citap}[1]{\textcolor{black}{(\cite{#1})}}
+
+% diagramas
+\usepackage{tikz, tikz-cd}
+\usepackage{pgf}
+\usetikzlibrary{cd, babel}  % evita errores en tikz
+\usetikzlibrary{graphs}
+\usetikzlibrary{graphs.standard}
+\usetikzlibrary{arrows,automata}
+
+
+% vertical separator macro
+\newcommand{\vsep}{
+  \column{0.0\textwidth}
+    \begin{tikzpicture}
+      \draw[very thick,black!10] (0,0) -- (0,7.3);
+    \end{tikzpicture}
+}
+
+% More space between lines in align
+\setlength{\mathindent}{0pt}
+
+% % Beamer theme
+ \usetheme{ZMBZFMK}
+\usefonttheme[onlylarge]{structurebold}
+\mode<presentation>
+\setbeamercovered{transparent=10}
+
+% align spacing
+\setlength{\jot}{0pt}
+
+ \setCJKmainfont[ItalicFont={AR PL UKai CN}]{AR PL UMing CN}
+%\setCJKmainfont[ItalicFont={AR PL UKai CN}]{SimSun}
+ \setCJKsansfont{SimSun}
+\setCJKmonofont{FangSong}
+
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Table of Contents}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+\AtBeginSubsection[]
+{
+  \begin{frame}
+    \frametitle{Table of Contents}
+    \tableofcontents[currentsubsection]
+  \end{frame}
+}
+
+
+% Only the first Slide
+\title{算法设计与分析}
+\author{MHT}
+\institute[Northeastern University at Qinhuangdao]{ }
+\date{\today}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Introduction}
+\begin{frame}{Answer two Questions}
+  
+\begin{itemize}[<+-|alert@+>]
+\item 算法(Algorithms)是什么？
+\item 为什么学习算法？
+\end{itemize}
+\end{frame}
+
+\begin{frame}{算法是计算机科学基础的重要主题}
+\begin{itemize}[<+-|alert@+>]
+\item 70年代前: 计算机科学基础的主题没有被清楚地认清
+\item 70年代: Knuth 出版$\ll$The Art of Computer Programming$\gg$,  确
+  立了算法为计算机科学基础的重要主题
+\item 70年代后: 算法作为核心推动了计算机科学技术飞速发展
+\end{itemize}
+\end{frame}
+
+\begin{frame}{广义算法}
+\begin{definition}
+\textbf{算法}是求解数据问题 (如寻找最大公约数) 的一个\underline{过程}, 该过程步骤有限, 通常还涉及重复的操作.
+
+  ---$\ll$韦氏大学词典(第九版)$\gg$
+\end{definition}
+\end{frame}
+
+\begin{frame}{计算机算法}
+%\begin{itemize}
+%\item 计算机能处理数万亿比特单位的信息, 能在一秒内完成数百万条基本指令 
+%\item 计算机可以处理非常复杂的任务, 而且同一任务往往必须执行多次的任务 
+%\end{itemize}
+  \begin{definition}
+    \textbf{计算机算法}是指若干条指令组成的有穷\underline{序列}, 对于符合一定规范的输入, 能够在有限时间内获得所要求的输出.
+  \end{definition}
+\end{frame}
+
+\begin{frame}{算法的直观理解}
+\begin{itemize}[<+-|alert@+>]
+\item 算法是\textbf{任何良好定义的计算过程}, 该过程以某个值或值集合作为输入并产生某个值或值的集合作为输出  
+\item 算法是\textbf{求解良好说明的计算问题的工具}:  \textbf{问题陈述}说明了期望的输入/输出关系; \textbf{算法描述}一个特定的计算过程实现该输入输出关系
+\end{itemize}
+\end{frame}
+
+\begin{frame}{排序问题示例}
+  \begin{definition}[排序问题]
+
+Input: $n$ 个数的一个序列 $<a_1, a_2, \ldots, a_n>$.  
+
+Output: 输入序列的一个排列 $<a_1', a_2',\ldots, a_n'>$, 满足 $a_1'\leq
+a_2'\leq \ldots, \leq a_n'$.  
+\end{definition}
+\begin{itemize}[<+-|alert@+>]
+\item \underline{\textbf{问题实例(Instance)}}由计算该问题所必需的(满足问题陈述中强加的各种约束)输入组成.  
+
+\item 给定\underline{输入序列$<31, 41, 59, 26, 41, 58>$}, 排序算法返回序列 $<26, 31, 41, 41, 58,
+  59>$ 作为输出.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Answer Two Questions}
+\begin{itemize}[<+-|alert@+>]
+\item 算法是什么？
+\item 为什么学习算法？
+\end{itemize}
+\end{frame}
+
+\begin{frame}  {算法评价1}
+\begin{quote}
+科技殿堂里陈列着两颗熠熠生辉的宝石, 一颗是微积分, \underline{另一颗就是算法}. \\
+
+微积分以及在微积分基础上建立起来的数学分析体系成就了现代科学, 而\underline{算法则成就了现代世界}. 
+\end{quote}
+\begin{center}
+  --- David Berlinski, \emph{The Advent of the Algorithm}, 2000
+\end{center}
+\end{frame}
+
+\begin{frame}{算法评价2}
+\begin{quote}
+算法不仅是计算机科学的一个分支, 它更是计算机科学的核心. 
+而且, 可以毫不夸张的说, 它同绝大多数科学、商业和技术都是相关的. 
+\end{quote}
+\begin{center}
+  ---David Harel, \emph{Algorithmics: the Spirit of Computing}, 1992
+\end{center}
+\end{frame}
+
+\begin{frame}{算法评价3}
+\begin{quote}
+算法是一种一般性的智能工具, 它必定有助于我们对其它学科的理解, 不管是化学、语言学、
+音乐, 还是另外的学科. 
+  
+%人们常说, 一个人只有把知识教给别人, 才能真正掌握它. 
+实际上, 一个人只有把知识教给``计算机'', 才能``真正''掌握它, 也就是
+说,\underline{将知识表述为一种算法}. 
+
+比起简单地按照常规去理解事物, 用算法将其形式化会使我们的理解更加深刻.
+\end{quote}
+\begin{center}
+--- Donald Knuth, \emph{Selcected Papers of Computer Science}, 1996
+\end{center}
+\end{frame}
+
+\begin{frame}  {Donald Knuth(高德纳)---TAOCP}
+\begin{figure}
+  \centering
+%   \includegraphics[width=.45\textwidth]{./pictures/concept.png}%
+%    \caption{算法的概念}
+  \label{fig:problem}
+\end{figure}
+  \begin{quote}
+著作: \emph{The Art of Computer Programming}(计算机程序设计艺术) 
+% \item 被誉为20世纪最重要的20部著作之一, 与 Einstein 的 $\ll$相对论$\gg$ 并列, 是计算机科学领域的权威著作
+% \item 被誉为``计算机程序设计理论的荷马史诗''
+
+如果你认为你是一名真正优秀的程序员, 读 Knuth 的 $\ll$计算机程序设计艺术$\gg$, 如果你能读懂整套书的话, 请给我发一份你的简历.  
+\hspace{7cm}---Bill Gates
+\end{quote}
+\end{frame}
+
+
+\begin{frame}{为什么学习算法}
+\begin{itemize}[<+-|alert@+>]
+\item[(1)] \underline{理论角度看}, 对算法的研究已经被公认为是计算机科学的基石
+   
+\item[(2)] \underline{实践角度看}, 我们必须了解计算领域中不同问题的一系列标准算法, 还要具备设计新算法和分析其效率的能力 
+\item[(3)] \underline{解决问题能力}, 学习算法可以用它来开发人们的分析能力, 算法给出了经过准确定义获得问题答案的过程 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{算法的重要应用之一---互联网}
+\begin{itemize}[<+-|alert@+>]
+\item 互联网的信息传输需要路由算法  
+\item 互联网的信息安全需要加密算法  
+\item 互联网的信息存储需要排序算法  
+\item 互联网的信息检索需要模式匹配算法  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{课程简介}
+\begin{itemize}[<+-|alert@+>]
+\item  ``计算机科学就是算法的研究'' 
+\item 计算机科学与技术专业处于核心地位的专业基础课程 
+\item 内容主要分为: 算法设计技术; 算法分析技术 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{课程关系}
+\begin{itemize}[<+-|alert@+>]
+\item 数据结构: 数据结构是信息的一种组织方式, 其目的是为了提高算法的效率
+\item 程序设计语言: C, C++, Java, Python \ldots
+\item 数学基础: 离散数学\ldots
+\end{itemize}
+\end{frame}
+
+\begin{frame}{学习目标}
+\begin{itemize}[<+-|alert@+>]
+\item 引导学生思考算法的设计和分析方法
+%\item 掌握计算机领域常见而有代表性的算法
+\item \underline{\textbf{理解并掌握算法设计的主要方法}}
+\item 培养对算法复杂性进行分析的能力
+\item 培养分析问题和解决问题的能力
+\end{itemize}
+\end{frame}
+
+\begin{frame}{强调算法设计技术的原因}
+\begin{itemize}[<+-|alert@+>]
+\item 学生解决新问题时, 可以运用这些技术设计出新算法  
+\item 试图按照算法的\underline{内在设计方法}对已知算法进行分类  
+\item 让学生知道如何发掘不同应用领域的算法间的共性  
+\item 算法设计技术作为问题求解的\underline{一般性策略}, 在解决计算机领域外的问题时, 也能发挥相当大的作用  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{设计技术作为问题求解的一般性策略}
+\begin{itemize}[<+-|alert@+>]
+\item 应用不局限于传统的计算问题和数学问题 
+\item 越来越多的计算类应用超越了它们的传统领域 
+\item 提高学生的问题求解能力是高等教育的一个主要目标 
+\item 本课程会告诉学生如何应用一些特定策略来解决问题 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{参考书目}
+\begin{itemize}[<+-|alert@+>]
+  \item 算法导论(第三版), [Introduction to Algorithms(Third Edition)], (美)Thomas
+    H.Cormen等,机械工业出版社
+\item 算法设计与分析基础(第2版), (美)Anany Levitin 著, 潘彦译, 清华大学出版社
+\item 
+数据结构算法与应用C++语言描述(英文版), [Data Structures,Algorithms, and Applications in C++,  (美)Sartaj Sahmi著, 机械工业出版社
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tips}
+  \begin{quote}
+一个人接受科技教育的最大收获，是那些能够受用一生的\textbf{\underline{通用智能工具}}.
+
+\hspace{6cm} ---George Forsythe, \\
+\hspace{1.5cm} What to do till the Computer Scientist comes. 1968
+\end{quote}
+\end{frame}
+
+\begin{frame}{章节安排}
+\begin{itemize}[<+-|alert@+>]
+\item 第1章 算法概述 [1.3 NP 完全理论]
+\item 第2章 递归与分治策略
+\item 第3章 动态规划
+\item 第4章 贪心算法
+\item 第5章 回溯法
+\item 第6章 分枝限界法
+\item 第8章 线性规划与网络流
+\item 补\quad 充: 算法选讲
+\end{itemize}
+\end{frame}
+
+% %\begin{frame}{考核方式}
+% %\begin{itemize}[<+-|alert@+>]
+% %\item 课程性质：考查
+% %\item 学时：40 学时
+% %\item 考核方式：考试成绩(70\%)+平时成绩和作业(30\%)
+% %\end{itemize}
+
+\begin{frame}{第1章  算法概述}
+学习要点：
+\begin{itemize}[<+-|alert@+>]
+\item 掌握算法的概念
+\item 掌握设计算法求解问题的基本步骤
+\item 理解算法计算复杂性分析框架
+\item 掌握算法复杂性的渐近数学表述
+\end{itemize}
+\end{frame}
+
+\begin{frame}{1.1 算法与程序}
+\textbf{1. 算法的概念}
+\begin{definition}[算法(\textbf{Algorithm})]
+算法是对特定问题求解的一种描述, 它是指令的有限序列, 其中每一条指令表示一个或多个操作.
+\end{definition}
+\end{frame}
+
+\begin{frame}{算法定义的描述}
+\begin{figure}
+  \centering
+%   \includegraphics[width=8cm]{./pictures/concept.png}%
+%    \caption{算法的概念}
+  \label{fig:problem}
+\end{figure}
+\end{frame}
+
+\begin{frame}{2. 算法性质}
+\begin{itemize}[<+-|alert@+>]
+\item 输入:  一个算法有零个或多个由外部提供的量作为算法的输入 
+\item 输出:  一个算法至少产生一个量作为输出 
+\item 确定性:  组成算法的每条指令都是清晰的, 无歧义的 
+\item 有限性: 算法中每条指令的执行次数是有限的, 执行每条指令的时间也是有限的 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{\textsf{Algorithm} 名字的由来}
+  \begin{quote}
+  ``十进制计数法是由印度人在公元 600 年左右发明的,它对数学推理简直是一场革命$\ldots$ \\ 推动此传播的是一本 9 世纪的阿拉伯文的教科书,该书由一个生活在巴格达的名叫 \textbf{Al Khwarizmi} 的人写成 ...
+
+几百年后,当十进制计数法在欧洲被广泛使用时, 算法 (\textbf{Algorithm}) 这个单词被人们创造出来以纪念这位智者 \textsf{Al Khwarizmi} 先生...''
+
+---Sanjoy Dasgupta et al. 著 $\ll$ 算法概论 $\gg$. 机械工业出版社,
+2009
+\end{quote}
+\end{frame}
+
+\begin{frame}{3. 程序的概念}
+\begin{definition}[程序(Program)]
+是为实现特定目标或解决特定问题而用计算机语言编写的命令序列的集合.  
+\end{definition}
+\end{frame}
+% \begin{itemize}[<+-|alert@+>]
+%\item 程序是算法用某种程序设计语言的具体实现  
+%\item 操作系统是一个在无限循环中执行的程序, 因而不是一个算法 
+%\end{itemize}
+% 然而可以把操作系统的各种任务可看成是单独的问题,每一个问题由操作系统中的一个子程序通过特定的算法来实现. 该子程序得到输出结果后便终止. 
+
+% % \begin{frame}{4. 学习算法的主要任务}
+% % \begin{itemize}[<+-|alert@+>]
+% % \item 设计算法: 创造性的活动
+% % \item 描述算法: 思想的表示形式
+% % \item 证明算法: 证明算法的正确性
+% % \item 分析算法: 算法时空复杂性分析
+% % %\item 测试程序: ``调试只能指出有错误,而不能指出它们不存在错误''
+% % \end{itemize}
+% % %通过课程学习,掌握计算机算法设计和分析基本策略与方法,为设计更复杂、更有效的算法奠定基础
+% \end{frame}
+
+\begin{frame}{4. 算法求解问题的过程}
+\begin{figure}
+  \centering
+%  \includegraphics[width=.6\textwidth]{./pictures/design.png}%
+%\caption{算法设计与分析过程}
+\end{figure}
+\end{frame}
+
+\begin{frame}{(1) 理解问题}
+\begin{itemize}[<+-|alert@+>]
+\item 仔细阅读问题的描述, \underline{试着手工处理一些小规模的例子}, 考虑一下特殊情况  
+\item 待解问题属于某类问题, 用已知算法求解   
+\item 不存在完全可用算法, 自己设计算法   
+\item 算法的输入, 确定了该算法所解决问题的一个实例   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{(2) 了解计算设备的性能}
+\begin{itemize}[<+-|alert@+>]
+\item RAM 机: 指令逐条执行, 每次执行一步操作  
+\item 作为科学实验, 则无需考虑计算速度和存储容量 
+\item 作为实用工具, 则需要考虑计算机的计算速度和存储容量  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{(3) 精确求解和近似求解之间做出选择}
+\begin{itemize}[<+-|alert@+>]
+\item 有些重要问题在很多情况下无法求得精确解   
+\item 有些问题用已知精确算法解决可能会慢得难以忍受   
+\item 近似算法可作为更复杂的精确算法的一部分   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{(4) 确定适当的数据结构}
+\center{
+ 算法+数据结构=程序
+}
+\end{frame}
+
+\begin{frame}{(5) 算法的设计技术}
+\begin{itemize}[<+-|alert@+>]
+\item 用算法解决问题的一般性方法  
+\item 用于解决不同计算领域的多种问题  
+\item 在给新问题设计算法时给予指导  
+\item 让我们以一种自然的方式对算法进行分类和研究  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{(6) 算法的描述}
+\begin{itemize}[<+-|alert@+>]
+\item[$\times$] 自然语言
+\item[$\surd$] 伪代码
+\item[$\surd$] 程序语言
+\end{itemize}
+\end{frame}
+
+\begin{frame}{(7) 算法的正确性证明}
+\begin{itemize}[<+-|alert@+>]
+\item \textbf{正确的算法}: 对于问题的每个输入实例, 算法都以正确的输出终止  
+\item \textbf{不正确的算法}: 对于问题的某些输入实例可能根本不终止, 也可能以不正确的输出终止  
+\item 必须证明对于每一合法输入, 该算法都会在有限的时间内输出一个的正确结果   
+\item 证明正确性一般方法是使用数学归纳法   
+%\item 根据一些特定输入研究算法操作并不能证明算法的正确性   
+%\item 对于近似算法正确性证明, 常常证明该算法所产生的误差不超出预定义范围
+% 
+%\item 调试程序 $\neq$ 程序正确性证明: 程序调试只能证明程序有错, 不能证明程序无错误! 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{(8) 算法的分析}
+\begin{itemize}[<+-|alert@+>]
+\item 有效性: 时间效率和空间效率   
+\item 简单性: 简单的算法更易于理解和实现   
+\item 一般性: 算法所解决问题的一般性和算法所接受输入的一般性   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{(9) 算法的实现}
+\begin{itemize}[<+-|alert@+>]
+\item 为算法编写的程序需要进行验证   
+\item 算法的程序实现用于实际应用时, 需要检验算法的输入是否合理   
+\item 对于实际程序, 可以提供若干输入, 计算程序的运行时间, 对结果进行分析   
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tips}
+
+\centering{
+\large{\textbf{一个好的算法是反复努力和重新修正的结果!}}  
+\vspace*{1cm}
+
+\textbf{发明一个算法是一个非常有创造性和非常值得付出的过程!}  
+}
+\end{frame}
+
+\begin{frame}{Fun Time}
+与算法相比，程序一般不满足如下哪条性质：
+
+\begin{itemize}[]
+\item[1.] 输入
+\item[2.] 输出
+\item[3.] 确定性
+\item[4.] 有限性
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fun Time}
+与算法相比，程序一般不满足如下哪条性质：
+\begin{itemize}[]
+\item[1.] 输入
+\item[2.] 输出
+\item[3.] 确定性
+\item[$\checkmark{4.}$] 有限性 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fun Time}
+算法求解问题的过程包括如下哪些步骤：
+\begin{itemize}[]
+\item[1.] 理解问题 \hspace{3cm} 2. 了解计算设备性能
+\item[3.] 选择精确解和近似解 \hspace{1.1cm} 4. 确定数据结构
+\item[5.] 选择算法设计技术 \hspace{1.5cm} 6. 选择算法描述方式
+\item[7.] 证明算法正确性 \hspace{1.9cm} 8. 分析算法效率
+\item[9.] 实现算法 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fun Time}
+  算法求解问题的过程包括如下哪些步骤：[1-9]
+  \begin{itemize}[]
+\item[1.] 理解问题 \hspace{3cm} 2. 了解计算设备性能
+\item[3.] 选择精确解和近似解 \hspace{1.1cm} 4. 确定数据结构
+\item[5.] 选择算法设计技术 \hspace{1.5cm} 6. 选择算法描述方式
+\item[7.] 证明算法正确性 \hspace{1.9cm} 8. 分析算法效率
+\item[9.] 实现算法 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{1.2 算法复杂性分析}
+\begin{itemize}[<+-|alert@+>]
+\item[1.] 算法分析的目的
+\item[2.] 算法复杂性分析框架
+\item[3.] 算法计算时间的渐近表示
+\end{itemize}
+\end{frame}
+
+\begin{frame}{1.  算法分析的目的}
+\begin{itemize}[<+-|alert@+>]
+\item 预测算法的行为, 应与运行算法的特定计算机无关  
+\item 对算法的效率可以做精确的定量研究 
+\item \underline{时间复杂性}指出算法运行得有多快 
+\item 空间复杂性关心算法需要的额外空间 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tips}
+\begin{quote}
+  \huge{\textbf{降低时间复杂性是算法研究中永恒的主题!}}
+\end{quote}
+\end{frame}
+
+
+\begin{frame}{2. 算法时间复杂性分析框架}
+\begin{itemize}[<+-|alert@+>]
+\item[(1)] 输入规模的度量
+\item[(2)] 运行时间的度量
+%\item[(3)] 运行时间函数的增长次数
+\item[(3)] 运行时间渐近分析 
+\item[(4)] 时间复杂性类型
+\end{itemize}
+\end{frame}
+
+\begin{frame}{(1) 输入规模的度量}
+\begin{itemize}[<+-|alert@+>]
+\item 算法对于规模更大的输入都需要运行更长时间  
+\item 算法复杂性是一个以算法输入规模 $n$ 为参数的函数 
+%\item 输入规模的度量单位： 
+  \begin{itemize}[<+-|alert@+>]
+\item 大多数与数组有关问题, 参数通常是数组长度 
+\item 矩阵计算选择矩阵的阶 
+\item 拼写检查算法选择字符数量或词的数量 
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{(2) 运行时间的度量}
+\begin{itemize}[<+-|alert@+>]
+ \item[$\times$] 采用标准时间单位度量算法程序的运行时间  
+ \item[$\times$] 统计算法每一步操作的执行次数  
+% \item 算法中基本操作通常是最内层循环中最费时的操作   
+ \item[$\surd$] 统计算法的\textbf{基本操作}执行次数  
+   \begin{itemize}[<+-|alert@+>]
+   \item 比较排序算法的键值比较  
+   \item 矩阵乘法算法中的乘法运算  
+   \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{算法时间复杂性分析框架的建立}
+\begin{itemize}[<+-|alert@+>]
+\item 对输入规模为 $n$ 的算法, 统计它的基本操作执行次数来对其复杂性进行度量  
+\item \textbf{算法时间复杂性}是处理一个输入规模为 $n$ 的问题的时间单元数  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{算法程序运行时间的估算公式}
+    \begin{exampleblock}{程序运行时间的估算公式} % 加 * 
+      \begin{equation*}
+        \hspace{3cm}        T(n) \approx c_{op}C(n)
+  \end{equation*}
+\end{exampleblock}   
+\begin{itemize}[<+-|alert@+>]
+\item $c_{op}$: 特定计算机上的一个算法基本操作执行时间  
+\item $C(n)$: 算法需要执行基本操作的次数  
+\item $T(n)$: 运行在该计算机上的某个算法程序的运行时间 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fun Time}
+%对算法的运行时间进行合理的估计
+\begin{itemize}[<+-|alert@+>]
+\item ``如果这个算法运行在一台比现有机器快10倍的机器上, 运行有多快?''($  T(n) \approx c_{op}C(n)$)  
+\item ``假设 $C(n)=\frac{1}{2}n(n-1)$, 如果输入规模翻倍, 该算法会运行多长时间?''  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fun Time}
+%对算法的运行时间进行合理的估计
+\begin{itemize}[<+-|alert@+>]
+\item ``假设 $C(n)=\frac{1}{2}n(n-1)$, 如果输入规模翻倍, 该算法会运行多长时间?''  
+\end{itemize}\pause
+\begin{displaymath}
+\hspace{2cm}\    C(n)=\frac{1}{2}n(n-1)=\frac{1}{2}n^2-\frac{1}{2}n\approx \frac{1}{2}n^2 
+  \end{displaymath}\pause
+  \begin{displaymath}
+\hspace{2cm}\    \frac{T(2n)}{T(n)}=\frac{c_{op}C(2n)}{c_{op}C(n)}=\frac{\frac{1}{2}(2n)^2}{\frac{1}{2}n^2}=4  
+  \end{displaymath}
+\end{frame}
+
+\begin{frame}{(3) 算法运行时间渐近分析}
+% \begin{itemize}[<+-|alert@+>]
+% \item 提取算法的主要特征, 定义一些在算法分析中重要且必需的参数和方法 
+% \item 近似分析也能够得到算法的一些重要信息  
+% \item 渐近分析可以用于比较不同的算法  
+% \end{itemize}
+
+\begin{itemize}[<+-|alert@+>]
+ \item 渐近分析是一种用于预测算法近似运行时间及进行算法比较的方法论  
+ \item 主要特征是忽略常数因子并关注输入大小无限增长后算法的行为  
+ \item 大多数算法的运行时间表达式只含较小的常数, 这种近似方法实践过程中很有效 
+ \item 分析结果表明对于特定的输入, 一个问题的算法预期运行会持续多长时间  
+ \end{itemize}
+\end{frame}
+%
+%{基本操作执行次数的增长次数}
+% \begin{itemize}[<+-|alert@+>]
+% \item 理论研究角度, 小规模输入不足以区分高效算法和低效算法 
+% \item 实际应用角度, 要求计算机解决的问题越来越复杂, 规模越来越大  
+% \item 为简化算法复杂性分析难度, 对大规模输入情况只分析算法基本操作的执行次数的\textbf{增长次数}  
+% \end{itemize}
+
+% \begin{frame}{算法分析常用函数}
+% \begin{table}
+% \small{
+% \caption{算法分析相关的重要函数值}%
+%   \begin{tabular}{l|l|l|l|l|l|l|l}
+%     \hline
+% $n$ & $\log_2n$ & $n$ & $n\log_2 n$ & $n^2$ & $n^3$ & $2^n$ & $n!$\\
+% \hline
+% $10$ & $3.3$ & $10^1$ & $3.3\times 10^1$ & $10^2$ & $10^3$ & $2^{10}$ & $3.6\times 10^6$\\
+% \hline
+% $10^2$ & $6.6$ & $10^2$ & $6.6\times 10^2$ & $10^4$ & $10^6$ & $1.3 \times 10^{30}$ & $9.3\times 10^{157}$\\
+% \hline
+% $10^3$ & $10$ & $10^3$ & $1.0\times 10^4$ & $10^6$ & $10^9$ &  & \\
+% \hline
+% $10^4$ & $13$ & $10^4$ & $1.3\times 10^5$ & $10^8$ & $10^{12}$ &  & \\
+% \hline
+% $10^5$ & $17$ & $10^5$ & $1.7\times 10^6$ & $10^{10}$ & $10^{15}$ &  & \\
+% \hline
+% $10^6$ & $20$ & $10^6$ & $2.0\times 10^7$ & $10^{12}$ & $10^{18}$ &  & \\
+% \hline
+%   \end{tabular}
+% }
+% \end{table}
+
+\begin{frame}{(4) 算法的最优、最差和平均复杂性}
+\begin{itemize}[<+-|alert@+>]
+%\item 许多算法的运行时间不仅取决于输入规模, 而且取决于特定输入细节  
+\item \textbf{最优复杂性}是指当规模输入为 $n$ 时, 算法在最优情况下的执行效率  
+\item \textbf{最差复杂性}是指当输入规模为 $n$ 时, 算法在最坏情况下的执行效率  
+\item \textbf{平均复杂性}提供在``典型''或``随机''输入情况下, 算法所具有的效率  
+%. 这时, 与其它规模为 $n$ 的输入相比, 该算法的运行时间最快  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{算法分析框架概要}
+\begin{itemize}[<+-|alert@+>]
+\item 算法复杂性用\underline{输入规模的函数}进行度量  
+\item 算法的时间复杂性用\underline{基本操作的执行次数}来度量  
+\item 当算法的输入规模趋向于无限大的时, 关注时间复杂性的\underline{渐近分析}  
+\item 某些算法需要区分最差复杂性、最优复杂性和平均复杂性  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fun Time:顺序查找算法复杂性分析}
+    \begin{exampleblock}{SequentialSearch.} % 
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time:顺序查找算法复杂性分析}
+    \begin{exampleblock}{} % 
+    \textbf{SequentialSearch}($A[0..n-1]$, $K$)\\
+\qquad         $i\gets 0$\\
+\qquad \textbf{while} $i< n$ \textbf{and} $A[i]\neq K$ \textbf{do}\\
+\qquad\ \qquad  $i\gets i+1$\\
+\qquad \textbf{if}  $i < n$ \\
+\qquad \qquad \textbf{return} $i$\\
+\qquad \textbf{else} \\
+\qquad \qquad \textbf{return} $-1$
+\end{exampleblock}
+\end{frame}
+
+
+
+\begin{frame}{算法最差、最优时间复杂性}
+\begin{itemize}[<+-|alert@+>]
+\item   $C_{worst}(n)=n$.  
+\item  $C_{best}(n)=1$. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fun Time}
+  试计算顺序查找算法平均时间复杂性。
+\end{frame}
+
+\begin{frame}{}
+两个假设条件：
+\begin{itemize}[<+-|alert@+>]
+\item[(1)] 成功查找概率为 $p(0\leq p\leq 1)$  
+\item[(2)] 对于任意 $i$ , 第一次匹配发生在数组第 $i$ 个位置的概率相同  
+\end{itemize}
+    \begin{exampleblock}{SequentialSearch.} % 
+    \textbf{SequentialSearch}($A[0..n-1]$, $K$)\\
+\qquad         $i\gets 0$\\
+\qquad \textbf{while} $i< n$ \textbf{and} $A[i]\neq K$ \textbf{do}\\
+\qquad\ \qquad  $i\gets i+1$\\
+\qquad \textbf{if} $i < n$ \textbf{return} $i$\\
+\qquad \textbf{else} \textbf{return} $-1$
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time}
+ \begin{eqnarray*}
+   C_{avg}(n)& = & \bigg[ 1\times \frac{p}{n}+2\times \frac{p}{n} + \cdots + i\times \frac{p}{n}+\cdots +
+   n\times \frac{p}{n}\bigg ] \\ 
+ & & + n\times (1-p)  \\ \pause
+ & = & \frac{p}{n}[1+2+\cdots +i+\cdots n]+n(1-p)   \\ \pause
+ & = & \frac{p}{n} \frac{(n(n+1))}{2}+n(1-p)=\frac{p(n+1)}{2}+n(1-p)  \pause
+ \end{eqnarray*}
+\end{frame}
+
+\begin{frame}{3. 计算时间的渐近表示}
+%``算法基本操作的执行次数的增长次数''
+\begin{itemize}[<+-|alert@+>]
+\item[(1)] 渐近时间复杂性  
+\item[(2)] 渐近函数符号: $O$, $\Omega$, $\Theta$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{(1) 渐近时间复杂性}
+\begin{definition}给定算法 $A$ 复杂性函数 $T(n)$, 如果存在函数 $T'(n)$, 使得当 $n\to \infty$
+  时有
+  \begin{equation*}
+      \hspace{5cm}  \frac{(T(n)-T'(n))}{T(n)} \to 0
+      \end{equation*}
+      则称 $T'(n)$ 是 $T(n)$ 当 $n\to \infty$ 时的渐近性态, 或称 $T'(n)$ 为算法
+$A$ 当 $n\to \infty$ 的\textbf{渐近复杂性}.
+\end{definition}
+\end{frame}
+
+\begin{frame}{直观理解渐近复杂性分析}
+\begin{itemize}[<+-|alert@+>]
+\item 渐近复杂性是简化复杂性分析的一种手段  
+\item $T'(n)$ 是 $T(n)$ 中略去低阶项所留下的主项  
+\item 若 $T(n) = 3n^2\underline{+4n\log n+7}$, 则 $T'(n) = 3n^2$, 因为  
+\begin{displaymath}
+\frac{(T(n)-T'(n))}{T(n)} = \frac{4n\log n+7}{3n^2+4n\log n+7} \to 0, (n\to
+  \infty)  
+\end{displaymath}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{渐近复杂性类型}
+\begin{table}\small % 
+%\caption{基本的渐近复杂性类型}
+\renewcommand\arraystretch{1.5}
+\begin{tabular}{c|c|l}
+  \hline
+类  型 & 名  称 & \hspace{3cm} 注  释\\
+\hline
+1 & 常 量 & 为数很少的效率最高的算法\\
+\hline
+$\log n$ & 对数 &  算法的每一次循环都会消去问题规模的一个常数因子\\
+\hline
+$n$ & 线性 & 扫描规模为 $n$ 的列表的算法属于这种类型\\
+\hline 
+$n\log n$ & $|n-\log-n|$ & 许多分治算法的平均复杂性属于这种类型\\
+\hline
+$n^2$ & 平方 & 包含两重嵌套循环的算法的典型复杂性\\
+\hline
+$n^3$ & 立方 & 包含三重嵌套循环的算法的典型复杂性\\
+\hline
+$2^n$ & 指数 & 求 $n$ 个元素集合的所有子集的算法\\
+\hline
+$n!$ & 阶乘 & 求 $n$ 个元素集合的完全排列的算法\\
+  \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{计算速度与算法复杂性的比较}
+  \begin{itemize}[<+-|alert@+>]
+  \item 计算机速度的大幅度提高不会削弱对有效算法的需求 
+  \item 计算速度的提高使我们可以处理更大的问题  
+  \item  算法复杂性决定了由于计算速度的提高带来的可处理的问题规模增量的大小  
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{算法 $A_1 \sim A_5$}
+时间复杂性:处理输入规模为 $n$ 的问题的时间单元数 
+\begin{table}
+  \centering
+  \begin{tabular}{cc}
+    算法 &\qquad \qquad  时间复杂性\\
+    $A_1$ & \qquad \qquad $n$ \\
+    $A_2$ & \qquad \qquad $n \log n$ \\
+    $A_3$ & \qquad \qquad $n^2$ \\
+    $A_4$ & \qquad \qquad $n^3$ \\
+    $A_5$ & \qquad \qquad $2^n$ \\
+  \end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{计算速度提高对解决问题规模的影响}
+\begin{table}
+\centering
+\small{
+\caption{计算机十倍加速的效果}
+\begin{tabular}[c]{|c|c|c|c|}
+\hline
+算法 & 时间复杂度 & 加速前最大问题规模 & 加速后最大问题规模 \\
+\hline
+$A_1$ & $n$ & $s_1$ & $10s_1$ \\
+
+$A_2$ & $n\log n$ & $s_2$ & 约 $10s_2$ \\
+
+$A_3$ & $n^2$ & $s_3$ & $3.16s_3$ \\
+
+$A_4$ & $n^3$ & $s_4$ & $2.15s_4$ \\
+
+$A_5$ & $2^n$ & $s_5$ & $s_5+3.3$ \\
+\hline
+\end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{计算速度与算法复杂性比较结论}
+\begin{itemize}[<+-|alert@+>]
+\item 渐近复杂性是衡量算法好坏的一个重要标准  
+\item 随着未来计算速度的提高, 它将变得更加重要  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{时间复杂性增长与问题规模的比较}
+\begin{table}
+\centering
+\small{
+\caption{时间复杂性函数}
+\begin{tabular}[l]{|l|l|l|l|l|}
+\hline
+时间复杂性函数 & \multicolumn{4}{c|}{问题规模：$n$} \\
+\cline{2-5} & 10 & $10^2$ & $10^3$ & $10^4$ \\
+\hline
+$\log n$ & $3.3$ & $6.6$ & $10$ & $13.3$ \\
+$n$  & $10$ & $10^2$ & $10^3$ & $10^4$ \\
+$n\log n$ & $0.33\times 10^2$ & $0.7\times 10^3$ & $10^4$ & $1.3\times 10^5$ \\
+$n^2$ &  $10^2$ & $10^4$ & $10^6$ & $10^8$ \\
+$2^n$  & $1024$ & $1.3 \times 10^{30}$ & $>10^{100}$ & $> 10^{100}$ \\
+$n!$ & $3\times 10^6$ & $>10^{100}$ & $>10^{100}$ & $> 10^{100}$ \\
+\hline
+\end{tabular}
+}
+\end{table}
+\end{frame}
+
+\begin{frame}{Tips}
+\vspace*{1cm}
+\begin{quote}
+  \centering
+  \large{\textbf{一个指数级算法只能用来解决规模非常小的问题!}}
+\end{quote}
+\end{frame}
+
+\begin{frame}{(2) 渐近复杂性函数符号}
+%用于算法渐近时间复杂性进行比较和归类的符号:
+\begin{itemize}[<+-|alert@+>]
+\item 同阶函数符号-$\Theta$
+\item 低阶函数符号-$O$
+\item 高阶函数符号-$\Omega$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{渐近复杂性函数符号的直观理解}
+\begin{itemize}[<+-|alert@+>]
+\item $\Theta$ 符号可视为 $=$, 用于估计函数的准确阶   
+\item $O$ 符号可视为 $\leq$, 用于估计函数的\underline{渐近上界}   
+\item $\Omega$ 符号可视为 $\geq$, 用于估计函数的\underline{渐近下界}   
+\item 当问题规模很大时, 忽略渐近关系和确切大小间的区别可以大大降低算法分析的难度  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{同阶函数集合}
+
+\begin{definition}[同阶函数集合]
+对于给定函数$g(n)$,我们用~$\Theta(g(n))$~表示函数集合: 
+\begin{center}
+  $\Theta(g(n))=\{f(n):$ $\exists\ c_1, c_2 >0, n_0$~, 对于所有~$n\geq n_0$, 满足~$0\leq c_1g(n) \leq f(n)\leq c_2g(n)$\} 
+\end{center}
+称~$\Theta(g(n))$~为与函数~$g(n)$~\textbf{同阶的函数集合}.  
+ 
+如果~$f(n) \in \Theta(g(n))$, 我们称为~$f(n)$~与~$g(n)$~同阶,
+ ~通常记作~$f(n)=\Theta(g(n))$.
+\end{definition}
+\end{frame}
+
+\begin{frame}{符号 $\Theta$}
+\begin{figure}
+  \centering
+%  \includegraphics[width=9cm]{./pictures/bigo1.png}%
+%  \caption{$f(n)=\Theta(g(n))$}%
+\end{figure}
+\end{frame}
+%
+%\begin{frame}{同阶函数示例}
+% 例: 证明 $f(n)=an^2+bn+c=\Theta(n^2)$.   \\
+% \begin{quote}
+%   证明: 设 $c_1n^2\leq an^2+bn+c \leq c_2n^2$, 令 $c_1=a/4$, $c_2=7a/4$, 则   \\
+% $\frac{a}{4}n^2\leq an^2+bn+c \leq \frac{7a}{4}n^2$,   \\ 
+% 令 $n_0=2\cdot \mathrm{max}((|b|/a), \sqrt{|c|/a})$.   \\
+% 当 $n> n_0$ 时, $c_1n^2\leq an^2+bn+c \leq c_2n^2$ 成立.  
+% \end{quote}
+
+\begin{frame}{同阶函数示例}
+例: 证明 $\frac{1}{2}n(n-1)=\Theta(n^2)$.   \\
+\begin{proof}
+首先证明右边的不等式:  \\ \pause
+当 $n\geq 0$ 时, $\frac{1}{2}n(n-1)=\frac{1}{2}n^2-\frac{1}{2}n\leq
+\frac{1}{2}n^2$   \\ \pause
+
+其次, 证明左边不等式:  \\ \pause
+$\frac{1}{2}n(n-1)=\frac{1}{2}n^2-\frac{1}{2}n\geq
+\frac{1}{2}n^2-\frac{1}{2}n \frac{1}{2}n = \frac{1}{4}n^2 $ ,($n \geq
+2$)  \\ \pause
+因此, 可以选择 $c_2= \frac{1}{4}$, $c_1 = \frac{1}{2}$, $n_0=2$.  \pause
+\end{proof}
+\end{frame}
+
+\begin{frame}{低阶函数集合}
+\begin{definition}[低阶函数集合]
+给定函数~$g(n)$,用符合~$O(g(n))$~表示函数集合: 
+\begin{center}
+  $ O(g(n)) = \{f(n)$: $\exists\ c > 0, n_0$, 对于所有~$n\geq n_0$,  满足~$0\leq f(n) \leq cg(n)\}$,
+\end{center}
+称~$O(g(n))$~为比函数~$g(n)$~\textbf{低阶的函数集合}.  
+
+ 如果~$f(n)\in O(g(n))$, 称~$g(n)$~是~$f(n)$~的上界, 
+通常记作~$f(n)=O(g(n))$  
+\end{definition}
+\end{frame}
+
+\begin{frame}{符号 $O$}
+%\ThisCenterWallPaper{4}{debian.png}%
+\begin{figure}
+  \centering
+%  \includegraphics[width=8cm]{./pictures/bigo2.png}%
+%  \caption{$f(n)=O(g(n))$}%
+\end{figure}
+\end{frame}
+
+\begin{frame}{低阶函数示例}
+例: 证明 $n=O(n^2)$.  \\ \pause
+\begin{proof}
+ 令 $c=1$, $n_0=1$,   \\ \pause
+则当 $n>n_0$ 时, $0\leq n \leq cn^2$ 成立.   \pause
+\end{proof}
+\end{frame}
+
+\begin{frame}{高阶函数集合}
+\begin{definition}[高阶函数集合]
+给定函数~$g(n)$,符合~$\Omega(g(n))$~表示函数集合: 
+
+    $\Omega(g(n)) =  \{f(n): \exists\ c>0,  n_0$, 对于所有~$n\geq n_0$, 满足~ $0\leq cg(n) \leq f(n) \}$,
+
+称~$\Omega(g(n))$~为比函数~$g(n)$~\textbf{高阶的函数集合}.  
+
+ 如果~$f(n) \in \Omega(g(n))$, 称~$g(n)$~是~$f(n)$~的下界, 
+~通常记作~$f(n)=\Omega(g(n))$  
+\end{definition}
+\end{frame}
+
+\begin{frame}{符号 $\Omega$}
+
+\begin{figure}
+  \centering
+%  \includegraphics[width=8cm]{./pictures/bigo3.png}%
+%  \caption{$f(n)=\Omega(g(n))$}%
+\end{figure}
+\end{frame}
+
+\begin{frame}{渐近复杂性函数关系定理}
+\begin{Theorem}
+  对于任意 $f(n)$, $g(n)$, $f(n)=\Theta(g(n))$ 当且仅当 $f(n)=O(g(n))$ and $f(n)=\Omega(g(n))$. 
+\end{Theorem}
+
+
+\begin{Theorem}
+  对于任意的 $t_1(n) \in O(g_1(n))$, $t_2(n)\in O(g_2(n))$, 有 
+  \begin{displaymath}
+    t_1(n)+t_2(n)=O(max\{g_1(n), g_2(n)\}). 
+  \end{displaymath}
+说明: 对于两个连续执行部分组成的算法, 该算法整体效率由具有较差时间复杂性的部分决定.  
+\end{Theorem}
+\end{frame}
+
+\begin{frame}{利用极限比较函数阶}
+\begin{eqnarray*}
+  \lim_{n\to \infty}\frac{f(n)}{g(n)}=\left\{
+    \begin{array}{ll}
+      0, &  f(n) = O(g(n)) \qquad [\leq]\\
+c>0, &  f(n) = \Theta(g(n)) \qquad [=]\\
+\infty, & f(n) = \Omega(g(n))\qquad [\geq]
+    \end{array}
+\right.
+\end{eqnarray*}
+\end{frame}
+
+\begin{frame}{洛比达法则}
+  \begin{exampleblock}{洛比达法则}
+      \begin{equation*}
+\hspace{5cm}      \lim_{n\to \infty}\frac{f(n)}{g(n)} = \lim_{n\to \infty}\frac{t'(n)}{g'(n)}
+\end{equation*}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{函数阶比较示例}
+\begin{itemize}[<+-|alert@+>]
+\item 例:  $f(n)=an^2+bn+c=\Theta(n^2)$. 
+\item 例:  $n=O(n^2)$.  
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Fun Time}
+  \begin{exampleblock}{}
+    试比较$\log_2 n$ 和$\sqrt{n}$ 函数.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time}
+\begin{eqnarray*}
+  \lim_{n\to \infty}\frac{\log_2n}{\sqrt n} & = &   \lim_{n\to
+    \infty}\frac{(\log_2 n)'}{(\sqrt n)'}   \\ \pause
+& = &   \lim_{n\to \infty}\frac{\frac{1}{\ln2* n}}{\frac{1}{2\sqrt n}}
+  \\ \pause
+& = & \frac{2}{\ln 2}  \lim_{n\to \infty}\frac{\sqrt n}{n}    \\ \pause
+& = & 0   \pause
+\end{eqnarray*}
+So, $\log_2 n \in O(\sqrt n)$.   \pause
+\end{frame}
+
+\begin{frame}{常用求和运算法则和公式}
+  \begin{exampleblock}{求和运算基本法则}
+\begin{align}
+  \sum_{i=l}^{u}ca_i & =  c\sum_{i=l}^{u}a_i\\
+  \sum_{i=l}^{u}(a_i\pm b_i) & =    \sum_{i=l}^{u}a_i\pm   \sum_{i=l}^{u}b_i
+\end{align}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{求和公式}
+  \begin{exampleblock}{求和公式}
+    \begin{align}
+\sum_{i=l}^{u}1 & =  u-l+1, l\leq u\\
+      \sum_{i=0}^{n}i & =  1+2+\cdots + n \nonumber\\
+                & =  \frac{n(n+1)}{2} 
+    \end{align}
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{例1. 查找最大元素问题}
+  \begin{exampleblock}{查找最大元素问题}
+   问题描述: 从 $n$ 个元素数组中查找最大元素.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{算法描述}
+  \begin{exampleblock}{MaxElement.}
+      MaxElement($A[0..n-1]$)\\
+1\qquad\  $maxval \gets A[0]$\\
+2\qquad\ \textbf{for} $i\gets 1$ \textbf{to} $n-1$ \textbf{do}\\
+3\qquad\ \qquad\ \textbf{if}\underline{$A[i] > maxval$}\\
+4\qquad\ \qquad\  \qquad\ $maxval \gets A[i]$\\
+5\qquad\ \textbf{return} $maxval$ 
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{确定算法输入规模和基本操作}
+\begin{itemize}[<+-|alert@+>]
+\item 输入规模用数组元素的个数 $n$ 度量  
+\item 位于 \textbf{for} 循环中的比较操作作为基本操作  
+\item 比较运算的执行次数记作 $C(n)$, 确定一个将 $C(n)$ 表示为规模 $n$ 为参数的函数 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{确立算法基本操作执行次数的表达式}
+  \begin{exampleblock}{}
+    \begin{equation*}
+  \hspace{3cm}      C(n) = \sum_{i=1}^{n-1}1 = n - 1 = \Theta(n)
+      \end{equation*}
+    \end{exampleblock}
+  
+\end{frame}
+
+\begin{frame}{算法复杂性分析方案}
+\begin{itemize}[<+-|alert@+>]
+\item[(1)] 决定用哪个参数表示输入规模  
+\item[(2)] 找出算法的基本操作, 通常位于算法的最内层循环  
+\item[(3)] 检查基本操作的执行次数是否只依赖于输入规模  
+\item[(4)] 建立算法基本操作执行次数的求和表达式   
+\item[(5)] 利用求和公式和法则建立一个操作次数的闭合公式, 或者确定它的渐近函数  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{例2. 元素唯一性问题}
+  \begin{exampleblock}{元素唯一性问题}
+    问题描述:验证给定数组中的元素是否全部唯一.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time}
+  \begin{exampleblock}{UniqueElements.}
+ UniqueElements($A[0..n-1]$)\\
+1\qquad\ \textbf{for} $i\gets 0$ \textbf{to} $n-2$ \textbf{do}\\
+2\qquad\ \qquad\ \textbf{for} $j\gets i+1$ \textbf{to} $n-1$ \textbf{do}\\
+3\qquad\ \qquad\ \qquad \textbf{if} $A[i]=A[j]$ \\
+4\qquad \qquad \qquad \qquad \textbf{return False}\\
+5\qquad\ \textbf{return True} 
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Fun Time}
+试分析元素唯一性算法复杂性: $C_{worst}(n)$ 
+\begin{itemize}[<+-|alert@+>]
+\item 输入规模度量为数组中元素个数 $n$  
+\item 最内层循环的比较操作为基本操作  
+\item 元素比较的次数还取决于数组中是否有相同元素, 及相同元素在数组中的位置 
+\item $C_{worst}(n)$ 表示对某个数组所做的比较次数最多  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fun Time}
+  \begin{exampleblock}{}
+    \begin{align*}
+   C_{worst}(n) & =  \sum_{i=0}^{n-2}\sum_{j=i+1}^{n-1}1   \\
+ &=  \sum_{i=0}^{n-2}[(n-1)-(i+1)+1]   \\
+ & =  \sum_{i=0}^{n-2}(n-1-i) =  \frac{(n-1)n}{2}=\Theta(n^2) 
+    \end{align*}
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}{复杂性分析方案小结}
+\begin{itemize}[<+-|alert@+>]
+\item 循环变量的无规律变化
+\item 过于复杂而无法求解的求和表达式
+\item 分析平均情况的固有难度
+\end{itemize}
+\end{frame}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
